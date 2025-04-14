@@ -26,12 +26,12 @@ const events = [
     description: "Review PRs and finalize module structure.",
     time: "02:15 PM - 02:50 PM",
   },
-  {
-    id: 4,
-    title: "Design Sync",
-    description: "Discussion with design team about UI improvements.",
-    time: "04:00 PM - 05:30 PM",
-  },
+  // {
+  //   id: 4,
+  //   title: "Design Sync",
+  //   description: "Discussion with design team about UI improvements.",
+  //   time: "04:00 PM - 05:30 PM",
+  // },
 ];
 
 const EventCalendar = () => {
