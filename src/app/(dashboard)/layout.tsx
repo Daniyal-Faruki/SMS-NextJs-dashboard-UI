@@ -29,6 +29,7 @@ export default function DashboardLayout({
           <Image src="/logo.png" alt="app-logo" width={32} height={32} />
           <span className="hidden lg:block">Reward Point System</span>
         </Link>
+        {/*TODO Organizations Dropdown Will be added Here  */}
         <Menu/>
         <div className="absolute bottom-0 left-0 w-full">
           <UserMenu/>
