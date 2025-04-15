@@ -1,9 +1,13 @@
 "use client";
 import React, { useState } from "react";
 import SearchFormWrapper from "@/components/SearchFormWrapper";
-import { formatDate } from "@/utils/dateUtils"; // Assuming this is for formatting date ranges
 import { ComponentNameEnum } from "@/utils/enums"; // Assuming you have an enum for components
 import "../../../styles/styles.scss";
+import TableDrawer from "@/components/table/TableDrawer";
+import { Employee } from "@/models/Employee.model";
+import { ColumnDef } from "@tanstack/react-table";
+import UpdateEmployee from "@/components/table/UpdateEmployee";
+import AddEmployeeDialog from "@/components/FormsDialog/AddEmployeeDialog";
 
 const EmployeesPage = () => {
   const [formData, setFormData] = useState({
@@ -20,10 +24,12 @@ const EmployeesPage = () => {
     Employees: {
       label: "Add Employee",
       buttonClass: "btn-add-new",
+      component: AddEmployeeDialog, // ✅ Add this!
     },
     // EmployeeRewards: {
     //   label: "Add Reward",
     //   buttonClass: "btn-add-reward",
+    //   component: AddReward, // if applicable
     // },
   };
 
@@ -41,6 +47,59 @@ const EmployeesPage = () => {
     { teamName: "Team D", teamUid: "team-d" },
     { teamName: "Team E", teamUid: "team-e" },
     { teamName: "Team F", teamUid: "team-f" },
+  ];
+
+  const employeeColumns: ColumnDef<Employee>[] = [
+    {
+      id: "1",
+      accessorKey: "employeeId",
+      header: "Employee ID",
+    },
+    {
+      id: "2",
+      accessorKey: "employeeName",
+      header: "Name",
+    },
+    {
+      id: "3",
+      accessorKey: "email",
+      header: "Email",
+    },
+    {
+      id: "4",
+      accessorKey: "teamName",
+      header: "Team",
+    },
+  ];
+
+  const employeesMockData: Employee[] = [
+    {
+      uid: "emp-001",
+      employeeId: "E001",
+      employeeName: "Alice Johnson",
+      email: "alice.johnson@example.com",
+      teamName: "Team A",
+      teamUid: "team-a",
+      isDeleted: false,
+    },
+    {
+      uid: "emp-002",
+      employeeId: "E002",
+      employeeName: "Bob Smith",
+      email: "bob.smith@example.com",
+      teamName: "Team B",
+      teamUid: "team-b",
+      isDeleted: false,
+    },
+    {
+      uid: "emp-003",
+      employeeId: "E003",
+      employeeName: "Charlie Davis",
+      email: "charlie.davis@example.com",
+      teamName: "Team C",
+      teamUid: "team-c",
+      isDeleted: false,
+    },
   ];
 
   // const gridClass = "grid grid-cols-2 gap-4"; // Example grid class
@@ -112,7 +171,18 @@ const EmployeesPage = () => {
         handleFormat={handleFormat}
         handleTeamDropdown={handleTeamDropdown}
       />
-      {/* Add Table Content Here */}
+      <TableDrawer
+        data={employeesMockData}
+        columns={employeeColumns}
+        organizationKey="org_123"
+        reloadTable={() => console.log("Reloading...")}
+        ComponentToLoad={ComponentNameEnum.Employees}
+        startDate=""
+        endDate=""
+        DrawerComponent={({ selectedRow, ...rest }) => (
+          <UpdateEmployee employee={selectedRow as Employee} {...rest} />
+        )}
+      />
     </div>
   );
 };

@@ -44,7 +44,7 @@ const UserMenu = () => {
 
       {/* Dropdown Menu */}
       {open && (
-        <div className="absolute bottom-12 left-0 w-48 bg-white shadow-lg rounded-md z-10">
+        <div className="absolute bottom-16 left-0 w-full bg-lamaPurpleLight shadow-lg rounded-md z-10">
           <ul className="text-sm text-gray-700 p-2">
             <li className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer">
               <FiUser />
