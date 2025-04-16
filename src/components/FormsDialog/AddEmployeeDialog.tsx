@@ -69,15 +69,15 @@ const AddEmployeeDialog = ({
   });
   
   const [loading, setLoading] = useState(true);
-
+  console.log("Add Employee Form", open)
   // Fetch employee lookup data
-  const fetchEmployeeLookups = async (organizationKey: string) => {
+  const fetchEmployeeLookups = async (organizationKey: string) => { debugger
     try {
       const headers = await getAuthHeaders(); // If you have a custom header hook
       const response = await fetch(`API_URL/${organizationKey}/lookup/GetEmployeeLookups`, { headers });
       const data = await response.json();
       return data;
-      return { employmentStatuses: [], roles: [], teams: [] }; // Mocked response
+    //   return { employmentStatuses: [], roles: [], teams: [] }; // Mocked response
     } catch (error) {
       throw error;
     }
@@ -168,11 +168,19 @@ const AddEmployeeDialog = ({
   // Check if email or employeeId already exists
   const checkIfExists = async (value: string, fieldName: string) => {
     try {
-      // Example API request to check if email or employeeId exists
-      // const url = `API_URL/${organizationKey}/employees/${fieldName}/${value}/check`;
-      // const response = await axios.get(url);
-      // return !response.data; // Returns true if not exists
-      return false; // Mocked response
+    //   Example API request to check if email or employeeId exists
+    const headers = await getAuthHeaders(); // Get headers with token
+
+    let url = '';
+
+    if (fieldName === 'email') {
+        url = `https://localhost:7192/api/v1/organizations/${organizationKey}/employees/${value}/check-email`;
+    } else if (fieldName === 'employeeId') {
+        url = `https://localhost:7192/api/v1/organizations/${organizationKey}/employees/${value}/check-employee-id`;
+    }
+
+    const response = await axios.get(url, { headers });
+      return !response.data; // Returns true if not exists
     } catch (error) {
       console.error(`Error checking ${fieldName}:`, error);
       return false;

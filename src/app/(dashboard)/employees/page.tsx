@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SearchFormWrapper from "@/components/SearchFormWrapper";
 import { ComponentNameEnum } from "@/utils/enums"; // Assuming you have an enum for components
 import "../../../styles/styles.scss";
@@ -8,6 +8,11 @@ import { Employee } from "@/models/Employee.model";
 import { ColumnDef } from "@tanstack/react-table";
 import UpdateEmployee from "@/components/table/UpdateEmployee";
 import AddEmployeeDialog from "@/components/FormsDialog/AddEmployeeDialog";
+import { Team } from "@/models/team.model";
+import { PeriodRangeLookup } from "@/models/periodRangeLookup.model";
+import { getScheduleRangeLookup } from "@/services/lookupService";
+import { useApi } from "@/hooks/useApi";
+import { handleError } from "@/components/shared/errorHandler";
 
 const EmployeesPage = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +23,97 @@ const EmployeesPage = () => {
   const [selectedPeriod, setSelectedPeriod] = useState({ endDate: "" });
   const [open, setOpen] = useState(false);
   const [dialogType, setDialogType] = useState<string | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]); // Use the custom Team type
+  const [periodsRange, setPeriodsRange] = useState<PeriodRangeLookup[]>([]); // Use the custom PeriodRangeLookup type
+  const api = useApi();
+
+// Fetch lookup data on component mount
+  useEffect(() => {
+    let isMounted = true; // 🔒 flag to track mount status
+  
+    const getPeriodsLookup = async () => {
+      try {
+        const data = await getScheduleRangeLookup(api, "ZIN");
+        if (isMounted) {
+          setPeriodsRange(data); // ✅ only update if still mounted
+          console.log("Periods Range: ", data);
+        }
+      } catch (error: any) {
+        console.error("Error fetching schedule periods:", error);
+        // Optional: Show snackbar
+        // setSnackbarMessage("Failed to load schedule periods.");
+        // setSnackbarSeverity("error");
+        // setOpenSnackbar(true);
+      }
+    };
+  
+    getPeriodsLookup();
+  
+    return () => {
+      isMounted = false; 
+    };
+  }, []);// Empty dependency array means this runs only once, on component mount
+
+  useEffect(() => {
+    let isMounted = true;
+  
+    // Debounced fetch
+    const fetchEmployees = useDebounce(async () => {
+      try {
+        const payload = {
+          searchString: formData.searchQuery,
+          teams:
+            formData.toggleValue.length === 1 && formData.toggleValue[0] === ""
+              ? null
+              : formData.toggleValue,
+        };
+  
+        const headers = await getAuthHeaders(); // ⛔️ Hook-safe: must be called inside a component or a function
+  
+        const response = await axios.post(
+          `https://localhost:7192/api/v1/organizations/${organizationKey}/employees/search`,
+          payload,
+          { headers }
+        );
+  
+        const data = response.data;
+  
+        if (isMounted) {
+          setData(data);
+          setColumns([
+            { label: "Employee", key: "employeeName" },
+            { label: "Employee ID", key: "employeeId" },
+            { label: "Email", key: "email" },
+            { label: "Employment Status", key: "employmentStatus" },
+            { label: "Team", key: "teamName" },
+            { label: "Role", key: "roleName" },
+            { label: "Phone No", key: "phoneNo" },
+            { label: "Joining Date", key: "joiningDate" },
+          ]);
+  
+          // if (payload.searchString === "" && payload.teams === null) {
+          //   const teamNames = filterAvailableTeams(data); // ✅ still safe
+          //   setTeams(teamNames);
+          // }
+        }
+      } catch (error) {
+        const errorHandlerMessage = handleError(error);
+        // if (isMounted) {
+        //   setOpenSnackbar(true);
+        //   setSnackbarSeverity("error");
+        //   setSnackbarMessage(errorHandlerMessage);
+        // }
+      }
+    }, 500); // ⏱ debounce of 500ms
+  
+    fetchEmployees(); // 🚀 trigger on mount or dependency change
+  
+    return () => {
+      isMounted = false; // ✅ cleanup to prevent state update on unmounted
+    };
+  }, [formData.searchQuery, formData.toggleValue, organizationKey]);
+  
+  
 
   // Sample data for dialogConfig
   const dialogConfig = {
@@ -34,20 +130,20 @@ const EmployeesPage = () => {
   };
 
   // Sample data for periods
-  const periodsRange = [
-    { startDate: "2023-01-01", endDate: "2023-06-30" },
-    { startDate: "2023-07-01", endDate: "2023-12-31" },
-  ];
+  // const periodsRange = [
+  //   { startDate: "2023-01-01", endDate: "2023-06-30" },
+  //   { startDate: "2023-07-01", endDate: "2023-12-31" },
+  // ];
 
   // Sample data for teams
-  const teams = [
-    { teamName: "Team A", teamUid: "team-a" },
-    { teamName: "Team B", teamUid: "team-b" },
-    { teamName: "Team C", teamUid: "team-c" },
-    { teamName: "Team D", teamUid: "team-d" },
-    { teamName: "Team E", teamUid: "team-e" },
-    { teamName: "Team F", teamUid: "team-f" },
-  ];
+  // const teams = [
+  //   { teamName: "Team A", teamUid: "team-a" },
+  //   { teamName: "Team B", teamUid: "team-b" },
+  //   { teamName: "Team C", teamUid: "team-c" },
+  //   { teamName: "Team D", teamUid: "team-d" },
+  //   { teamName: "Team E", teamUid: "team-e" },
+  //   { teamName: "Team F", teamUid: "team-f" },
+  // ];
 
   const employeeColumns: ColumnDef<Employee>[] = [
     {

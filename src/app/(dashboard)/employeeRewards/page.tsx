@@ -47,7 +47,7 @@ const EmployeeRewardsPage = () => {
   const ComponentToLoad = "Employee Rewards"; // Or dynamic based on context
   const canCreate = true; // Change this as needed
   const isMobile = false; // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
-
+  console.log("Employee rewards Component LoADED: ");
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, searchQuery: e.target.value }));
   };

@@ -14,7 +14,7 @@ export const useAuthHeaders = () => {
 					audience: environment.auth.authorizationParams.audience // Value from your config
 				}
 			});
-
+			console.log("Token From 'useAuthHeaders': ", token);
 			return {
 				Authorization: `Bearer ${token}` // Return headers with Bearer token
 			};
