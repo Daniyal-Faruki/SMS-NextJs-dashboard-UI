@@ -8,6 +8,7 @@ import Menu from "@/components/Menu";
 import Navbar from "@/components/Navbar";
 import UserMenu from "@/components/UserMenu";
 import ProtectedRoute from "@/auth0Config/ProtectedRoute";
+import OrganizationSelector from "@/components/OrganizationSelector";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,6 +37,7 @@ export default function DashboardLayout({
             <span className="hidden lg:block">Reward Point System</span>
           </Link>
           {/*TODO Organizations Dropdown Will be added Here  */}
+          <OrganizationSelector />
           <Menu />
           <div className="absolute bottom-0 left-0 w-full">
             <UserMenu />
@@ -43,7 +45,7 @@ export default function DashboardLayout({
         </div>
 
         {/* RIGHT */}
-        <div className="w-[86%] md:w-[92%] lg:w-[84%] xl:w-[86%] overflow-scroll bg-white border-l-2 p-8">
+        <div className="w-[86%] md:w-[92%] lg:w-[84%] xl:w-[86%] overflow-auto bg-white border-l-2 px-8 pt-8">
           {/* <Navbar/> */}
           {children}
         </div>

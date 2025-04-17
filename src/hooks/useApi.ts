@@ -19,7 +19,6 @@ export const useApi = () => {
             audience: environment.auth.authorizationParams.audience // Value from your config
         }
     });
-    console.log("Token From Auth0: ", token);
     config.headers.Authorization = `Bearer ${token}`;
     return config;
   });

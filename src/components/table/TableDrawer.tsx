@@ -7,9 +7,14 @@ import { Employee } from "@/models/Employee.model";
 import { EmployeeReward } from "@/models/employee-reward.model";
 import type { ColumnDef } from "@tanstack/react-table";
 
+interface TableColumns {
+	label: string;
+	key: string;
+}
+
 interface TableDrawerProps {
   data: (Employee | EmployeeReward)[];
-  columns: ColumnDef<Employee | EmployeeReward>[];
+  columns: { label: string; key: string }[]; // Column configuration//ColumnDef<TableColumns>[];
   organizationKey: string;
   reloadTable: () => void;
   ComponentToLoad: ComponentNameEnum;

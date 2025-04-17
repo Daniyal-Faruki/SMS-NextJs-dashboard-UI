@@ -13,6 +13,12 @@ import { PeriodRangeLookup } from "@/models/periodRangeLookup.model";
 import { getScheduleRangeLookup } from "@/services/lookupService";
 import { useApi } from "@/hooks/useApi";
 import { handleError } from "@/components/shared/errorHandler";
+import { searchEmployees } from "@/services/employeesService";
+
+interface TableColumns {
+  label: string;
+  key: string;
+}
 
 const EmployeesPage = () => {
   const [formData, setFormData] = useState({
@@ -24,13 +30,15 @@ const EmployeesPage = () => {
   const [open, setOpen] = useState(false);
   const [dialogType, setDialogType] = useState<string | null>(null);
   const [teams, setTeams] = useState<Team[]>([]); // Use the custom Team type
+  const [employees, setEmployees] = useState<Employee[]>([]); // Use the custom Team type
   const [periodsRange, setPeriodsRange] = useState<PeriodRangeLookup[]>([]); // Use the custom PeriodRangeLookup type
+  const [columns, setColumns] = useState<TableColumns[]>([]); // Store dynamic columns
   const api = useApi();
 
-// Fetch lookup data on component mount
+  // Fetch lookup data on component mount
   useEffect(() => {
     let isMounted = true; // 🔒 flag to track mount status
-  
+
     const getPeriodsLookup = async () => {
       try {
         const data = await getScheduleRangeLookup(api, "ZIN");
@@ -46,19 +54,17 @@ const EmployeesPage = () => {
         // setOpenSnackbar(true);
       }
     };
-  
+
     getPeriodsLookup();
-  
+
     return () => {
-      isMounted = false; 
+      isMounted = false;
     };
-  }, []);// Empty dependency array means this runs only once, on component mount
+  }, []); // Empty dependency array means this runs only once, on component mount
 
   useEffect(() => {
     let isMounted = true;
-  
-    // Debounced fetch
-    const fetchEmployees = useDebounce(async () => {
+    const fetchEmployees = async () => {
       try {
         const payload = {
           searchString: formData.searchQuery,
@@ -67,19 +73,16 @@ const EmployeesPage = () => {
               ? null
               : formData.toggleValue,
         };
-  
-        const headers = await getAuthHeaders(); // ⛔️ Hook-safe: must be called inside a component or a function
-  
-        const response = await axios.post(
-          `https://localhost:7192/api/v1/organizations/${organizationKey}/employees/search`,
-          payload,
-          { headers }
-        );
-  
-        const data = response.data;
-  
+        const data = await searchEmployees(api, "ZIN", payload);
+
         if (isMounted) {
-          setData(data);
+          setEmployees(data);
+          if (payload.searchString === "" && payload.teams === "") {
+            // Extract unique teams from employee data
+            const teamNames = filterAvailableTeams(data);
+            console.log("teams for filter: ", teamNames);
+            setTeams(teamNames as Team[]); // Set unique team names to state
+          }
           setColumns([
             { label: "Employee", key: "employeeName" },
             { label: "Employee ID", key: "employeeId" },
@@ -90,30 +93,46 @@ const EmployeesPage = () => {
             { label: "Phone No", key: "phoneNo" },
             { label: "Joining Date", key: "joiningDate" },
           ]);
-  
-          // if (payload.searchString === "" && payload.teams === null) {
-          //   const teamNames = filterAvailableTeams(data); // ✅ still safe
-          //   setTeams(teamNames);
-          // }
         }
       } catch (error) {
         const errorHandlerMessage = handleError(error);
-        // if (isMounted) {
-        //   setOpenSnackbar(true);
-        //   setSnackbarSeverity("error");
-        //   setSnackbarMessage(errorHandlerMessage);
-        // }
+        if (isMounted) {
+          // setOpenSnackbar(true);
+          // setSnackbarSeverity("error");
+          // setSnackbarMessage(errorHandlerMessage);
+        }
       }
-    }, 500); // ⏱ debounce of 500ms
-  
-    fetchEmployees(); // 🚀 trigger on mount or dependency change
-  
-    return () => {
-      isMounted = false; // ✅ cleanup to prevent state update on unmounted
     };
-  }, [formData.searchQuery, formData.toggleValue, organizationKey]);
-  
-  
+
+    fetchEmployees();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [formData.searchQuery, formData.toggleValue]);
+
+  const filterAvailableTeams = (
+    data: Employee[]
+  ): { teamName: string; teamUid: string }[] => {
+    const TEAM_NAME_SET = new Set<string>();
+
+    return data
+      .filter(({ teamName, teamUid }) => {
+        // ✅ Ensure both fields exist
+        if (!teamName || !teamUid) return false;
+
+        if (TEAM_NAME_SET.has(teamName)) {
+          return false;
+        }
+
+        TEAM_NAME_SET.add(teamName);
+        return true;
+      })
+      .map(({ teamName, teamUid }) => ({
+        teamName: teamName as string,
+        teamUid: teamUid as string,
+      }));
+  };
 
   // Sample data for dialogConfig
   const dialogConfig = {
@@ -128,75 +147,6 @@ const EmployeesPage = () => {
     //   component: AddReward, // if applicable
     // },
   };
-
-  // Sample data for periods
-  // const periodsRange = [
-  //   { startDate: "2023-01-01", endDate: "2023-06-30" },
-  //   { startDate: "2023-07-01", endDate: "2023-12-31" },
-  // ];
-
-  // Sample data for teams
-  // const teams = [
-  //   { teamName: "Team A", teamUid: "team-a" },
-  //   { teamName: "Team B", teamUid: "team-b" },
-  //   { teamName: "Team C", teamUid: "team-c" },
-  //   { teamName: "Team D", teamUid: "team-d" },
-  //   { teamName: "Team E", teamUid: "team-e" },
-  //   { teamName: "Team F", teamUid: "team-f" },
-  // ];
-
-  const employeeColumns: ColumnDef<Employee>[] = [
-    {
-      id: "1",
-      accessorKey: "employeeId",
-      header: "Employee ID",
-    },
-    {
-      id: "2",
-      accessorKey: "employeeName",
-      header: "Name",
-    },
-    {
-      id: "3",
-      accessorKey: "email",
-      header: "Email",
-    },
-    {
-      id: "4",
-      accessorKey: "teamName",
-      header: "Team",
-    },
-  ];
-
-  const employeesMockData: Employee[] = [
-    {
-      uid: "emp-001",
-      employeeId: "E001",
-      employeeName: "Alice Johnson",
-      email: "alice.johnson@example.com",
-      teamName: "Team A",
-      teamUid: "team-a",
-      isDeleted: false,
-    },
-    {
-      uid: "emp-002",
-      employeeId: "E002",
-      employeeName: "Bob Smith",
-      email: "bob.smith@example.com",
-      teamName: "Team B",
-      teamUid: "team-b",
-      isDeleted: false,
-    },
-    {
-      uid: "emp-003",
-      employeeId: "E003",
-      employeeName: "Charlie Davis",
-      email: "charlie.davis@example.com",
-      teamName: "Team C",
-      teamUid: "team-c",
-      isDeleted: false,
-    },
-  ];
 
   // const gridClass = "grid grid-cols-2 gap-4"; // Example grid class
   const ComponentToLoad = "Employees"; // Or dynamic based on context
@@ -231,7 +181,19 @@ const EmployeesPage = () => {
   };
 
   const handleFormat = (e: any, newVal: string) => {
-    setFormData((prev) => ({ ...prev, toggleValue: newVal }));
+    console.log("team clicked: ", formData);
+    const lastItem = newVal[newVal.length - 1];
+    setFormData((prev) => ({
+      ...prev,
+      toggleValue: lastItem === "" ? "" : newVal,
+    }));
+    const ALL_TEAMS = teams.length-1 === formData.toggleValue.length ? true : false;
+    if(ALL_TEAMS){
+      setFormData((prev) => ({
+        ...prev,
+        toggleValue: "",
+      }));
+    }
   };
 
   const handleTeamDropdown = (e: React.ChangeEvent<{ value: unknown }>) => {
@@ -254,7 +216,7 @@ const EmployeesPage = () => {
         open={open}
         dialogType={dialogType}
         closeDialog={closeDialog}
-        organizationKey="org-123"
+        organizationKey="ZIN"
         reloadTable={reloadTable}
         setOpenSnackbar={() => {}}
         setSnackbarMessage={() => {}}
@@ -268,9 +230,9 @@ const EmployeesPage = () => {
         handleTeamDropdown={handleTeamDropdown}
       />
       <TableDrawer
-        data={employeesMockData}
-        columns={employeeColumns}
-        organizationKey="org_123"
+        data={employees}
+        columns={columns}
+        organizationKey="ZIN"
         reloadTable={() => console.log("Reloading...")}
         ComponentToLoad={ComponentNameEnum.Employees}
         startDate=""

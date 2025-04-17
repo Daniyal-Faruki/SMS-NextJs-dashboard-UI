@@ -1,6 +1,8 @@
+"use client"
 import { role } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
   {
@@ -64,6 +66,8 @@ const menuItems = [
 ];
 
 const Menu = () => {
+  const pathname = usePathname(); // 👈 Get current path
+
   return (
     <div className="mt-4 text-sm">
       {menuItems.map((i) => (
@@ -75,11 +79,15 @@ const Menu = () => {
           </span>
           {i.items.map((item) => {
             if (item.visible.includes(role)) {
+              const isActive = pathname === item.href; // 👈 check if current route
+
               return (
                 <Link
                   href={item.href}
                   key={item.label}
-                  className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 rounded-md lg:px-2 hover:bg-cyan-500 hover:text-white"
+                  className={`flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 rounded-md lg:px-2 hover:bg-cyan-500 hover:text-white ${
+                    isActive ? "bg-cyan-500 text-white" : ""
+                  }`}
                 >
                   <Image
                     src={item.icon}

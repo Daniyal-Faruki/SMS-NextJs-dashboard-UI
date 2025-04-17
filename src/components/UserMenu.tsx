@@ -25,7 +25,7 @@ const UserMenu = () => {
       {/* Profile Button */}
       <div
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 cursor-pointer p-4 hover:bg-gray-100 rounded-md border-t-2"
+        className="flex items-center gap-2 cursor-pointer p-4 hover:bg-gray-100 border-t-2"
       >
         <Image
           src="/avatar.png"

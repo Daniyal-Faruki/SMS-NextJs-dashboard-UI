@@ -1,4 +1,5 @@
 // import { domain, clientId } from '../app/modules/auth/Auth_0/auth_config.json';//auth_config.json
+const redirectUri = typeof window !== "undefined" ? window.location.origin : ""; // fallback empty string or your default
 
 export const environment = {
 	production: false,
@@ -8,7 +9,7 @@ export const environment = {
 		domain: 'zin.auth0.com', //'dev-rv8uvmdpk6y01img.us.auth0.com',
 		clientId: '5HxtgYDvrkArUMyiXE2rzjSRJPMwCu6v',
 		authorizationParams: {
-			redirect_uri: window.location.origin,
+			redirect_uri: redirectUri, //window.location.origin,
 			audience: 'https://localhost-win:7192'
 			//RoleClaimType: "https://custom.ziniot.com/roles"
 		}
