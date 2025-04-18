@@ -69,11 +69,11 @@ const menuItems = [
 const Menu = ({ isCollapsed }: { isCollapsed: boolean }) => {
   const pathname = usePathname(); // 👈 Get current path
   const isMobile = useIsMobile();
-  
+
   return (
     <div className="mt-4 text-sm md:w-fit">
       {menuItems.map((i) => (
-        <div className="flex flex-col items-center gap-2 md:w-fit" key={i.title}>
+        <div className=" gap-2 md:w-fit" key={i.title}>
           
           {i.items.map((item) => {
             if (item.visible.includes(role)) {
@@ -83,7 +83,7 @@ const Menu = ({ isCollapsed }: { isCollapsed: boolean }) => {
                 <Link
                   href={item.href}
                   key={item.label}
-                  className={`flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 rounded-md md:p-3 md:w-fit lg:px-2 hover:bg-cyan-500 hover:text-white ${
+                  className={`flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 rounded-md md:p-3 md:w-fit mx-2 lg:px-2 hover:bg-cyan-500 hover:text-white ${
                     isActive ? "bg-cyan-500 text-white" : ""
                   } ${ isCollapsed ? "w-fit !p-4" : ""}`}
                 >
@@ -93,8 +93,9 @@ const Menu = ({ isCollapsed }: { isCollapsed: boolean }) => {
                     width={18}
                     height={18}
                   />
-                  {!isCollapsed && (
-                    <span className="hidden lg:block">{item.label}</span>
+                  {!isCollapsed  && (
+                    // className="hidden lg:block"
+                    <span >{item.label}</span>
                   )}
                 </Link>
               );
