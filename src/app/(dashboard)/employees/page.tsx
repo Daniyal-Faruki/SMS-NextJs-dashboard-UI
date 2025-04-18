@@ -14,6 +14,7 @@ import { getScheduleRangeLookup } from "@/services/lookupService";
 import { useApi } from "@/hooks/useApi";
 import { handleError } from "@/components/shared/errorHandler";
 import { searchEmployees } from "@/services/employeesService";
+import { useOrganization } from "@/context/OrganizationContext";
 
 interface TableColumns {
   label: string;
@@ -34,18 +35,17 @@ const EmployeesPage = () => {
   const [periodsRange, setPeriodsRange] = useState<PeriodRangeLookup[]>([]); // Use the custom PeriodRangeLookup type
   const [columns, setColumns] = useState<TableColumns[]>([]); // Store dynamic columns
   const api = useApi();
+  const { selectedOrg } = useOrganization();
 
+  console.log("Selected Organization: ", selectedOrg);
   // Fetch lookup data on component mount
   useEffect(() => {
-    let isMounted = true; // 🔒 flag to track mount status
 
     const getPeriodsLookup = async () => {
       try {
         const data = await getScheduleRangeLookup(api, "ZIN");
-        if (isMounted) {
           setPeriodsRange(data); // ✅ only update if still mounted
           console.log("Periods Range: ", data);
-        }
       } catch (error: any) {
         console.error("Error fetching schedule periods:", error);
         // Optional: Show snackbar
@@ -57,9 +57,6 @@ const EmployeesPage = () => {
 
     getPeriodsLookup();
 
-    return () => {
-      isMounted = false;
-    };
   }, []); // Empty dependency array means this runs only once, on component mount
 
   useEffect(() => {

@@ -1,21 +1,24 @@
 "use client";
-import React, { createContext, useContext, useState, ReactNode } from "react";
-
-interface Organization {
-  label: string;
-  icon: string;
-  org_key: string;
-}
+import { Organization, organizations } from "@/models/organization.model";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
 interface OrgContextType {
   selectedOrg: Organization | null;
   setSelectedOrg: (org: Organization) => void;
 }
 
+
 const OrganizationContext = createContext<OrgContextType | undefined>(undefined);
 
 export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+
+    // Set default org on first mount
+    useEffect(() => {
+        if (!selectedOrg) {
+          setSelectedOrg(organizations[0]); // Default to first org
+        }
+      }, [selectedOrg]);
 
   return (
     <OrganizationContext.Provider value={{ selectedOrg, setSelectedOrg }}>

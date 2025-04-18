@@ -1,4 +1,5 @@
-"use client"
+"use client";
+import useIsMobile from "@/hooks/useIsMobile";
 import { role } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
@@ -65,18 +66,15 @@ const menuItems = [
   // },
 ];
 
-const Menu = () => {
+const Menu = ({ isCollapsed }: { isCollapsed: boolean }) => {
   const pathname = usePathname(); // 👈 Get current path
-
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="mt-4 text-sm">
+    <div className="mt-4 text-sm md:w-fit">
       {menuItems.map((i) => (
-        <div className="flex flex-col gap-2" key={i.title}>
-
-          {/*TODO This span Will be removed later  */}
-          <span className="hidden lg:block text-gray-400 font-light my-2">
-            {/* {i.title} */}
-          </span>
+        <div className="flex flex-col items-center gap-2 md:w-fit" key={i.title}>
+          
           {i.items.map((item) => {
             if (item.visible.includes(role)) {
               const isActive = pathname === item.href; // 👈 check if current route
@@ -85,9 +83,9 @@ const Menu = () => {
                 <Link
                   href={item.href}
                   key={item.label}
-                  className={`flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 rounded-md lg:px-2 hover:bg-cyan-500 hover:text-white ${
+                  className={`flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 rounded-md md:p-3 md:w-fit lg:px-2 hover:bg-cyan-500 hover:text-white ${
                     isActive ? "bg-cyan-500 text-white" : ""
-                  }`}
+                  } ${ isCollapsed ? "w-fit !p-4" : ""}`}
                 >
                   <Image
                     src={item.icon}
@@ -95,7 +93,9 @@ const Menu = () => {
                     width={18}
                     height={18}
                   />
-                  <span className="hidden lg:block">{item.label}</span>
+                  {!isCollapsed && (
+                    <span className="hidden lg:block">{item.label}</span>
+                  )}
                 </Link>
               );
             }

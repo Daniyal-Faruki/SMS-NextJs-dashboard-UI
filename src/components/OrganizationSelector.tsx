@@ -1,52 +1,8 @@
+// src/components/OrganizationSelector.tsx
 "use client";
-import Image from "next/image";
 import { useOrganization } from "@/context/OrganizationContext";
+import { organizations } from "@/models/organization.model";
 
-interface Organization {
-	org_key: string;
-	label: string;
-	icon: string;
-	website: string;
-}
-
-const organizationss = [
-  {
-    label: "Zin Institute",
-    icon: "/icons/org1.png",
-    org_key: "zin_institute",
-  },
-  {
-    label: "Alpha School",
-    icon: "/icons/org2.png",
-    org_key: "alpha_school",
-  },
-  {
-    label: "Bright Future Academy",
-    icon: "/icons/org3.png",
-    org_key: "bright_future_academy",
-  },
-];
-
-const organizations: Organization[] = [
-	{
-		org_key: 'ZIN',
-		label: 'ZinTech',
-		icon: 'assets/icons/together.svg',
-		website: 'www.zintechnologies.com'
-	},
-	{
-		org_key: 'GRANITE',
-		label: 'Granite',
-		icon: 'assets/icons/granite.jpg',
-		website: 'www.granite.com'
-	},
-	{
-		org_key: 'PURPLEAIR',
-		label: 'PurpleAir',
-		icon: 'assets/icons/purpleAir.webp',
-		website: 'www.purpleAir.com'
-	}
-];
 
 const OrganizationSelector = () => {
   const { selectedOrg, setSelectedOrg } = useOrganization();
