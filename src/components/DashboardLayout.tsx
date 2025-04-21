@@ -34,13 +34,13 @@ export default function DashboardLayout({
           <OrganizationSelector />
           <Menu isCollapsed={isSidebarCollapsed} />
           <div className="absolute bottom-0 left-0 w-full">
-            <UserMenu />
+            <UserMenu  isCollapsed={isSidebarCollapsed}/>
           </div>
         </div>
 
         {/* Right */}
         {(isSidebarCollapsed && isMobile) || !isMobile ? (
-          <div className="w-full overflow-auto bg-white border-l-2 px-8 pt-8">
+          <div className="w-full overflow-auto bg-white border-l-2 px-8 pt-8 z-0">
             {children}
           </div>
         ) : null}

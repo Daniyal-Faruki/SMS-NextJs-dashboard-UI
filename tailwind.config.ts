@@ -5,6 +5,7 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    './context/**/*.{js,ts,jsx,tsx}', // 👈 just in case
   ],
   theme: {
     extend: {
@@ -19,7 +20,8 @@ const config: Config = {
         lamaPurple: "#CFCEFF",
         lamaPurpleLight: "#F1F0FF",
         lamaYellow: "#FAE27C",
-        lamaYellowLight: "#FEFCE8"
+        lamaYellowLight: "#FEFCE8",
+        RpsCyan: "#019CCC"
       }
     },
   },

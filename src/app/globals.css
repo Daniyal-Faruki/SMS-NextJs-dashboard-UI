@@ -18,3 +18,7 @@
     background: #C3EBFA !important;
     color: black !important;
 }
+
+.loading-overlay {
+    @apply fixed inset-0 z-[9999] bg-red-600 text-white flex items-center justify-center text-4xl;
+  }

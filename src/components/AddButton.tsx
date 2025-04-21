@@ -11,9 +11,22 @@ interface Props {
 }
 
 const AddButton: React.FC<Props> = ({ onClick, iconSrc, label, className }) => (
-  <Button onClick={onClick} variant="contained" color="primary" className={className}>
+  <Button
+    onClick={onClick}
+    variant="contained"
+    color="primary"
+    className={className}
+  >
     {/* <img className="icon-size-22 mr-6" src={iconSrc} alt="Plus Icon" /> */}
-    <Image className="icon-size-22 mr-6" src={iconSrc} alt="Plus Icon"  width={25} height={25}/>
+    {iconSrc && (
+      <Image
+        className="icon-size-22 mr-6"
+        src={iconSrc}
+        alt="Plus Icon"
+        width={25}
+        height={25}
+      />
+    )}
     {label}
   </Button>
 );

@@ -37,7 +37,7 @@ const EmployeesPage = () => {
   const api = useApi();
   const { selectedOrg } = useOrganization();
 
-  console.log("Selected Organization: ", selectedOrg);
+  // console.log("Selected Organization: ", selectedOrg);
   // Fetch lookup data on component mount
   useEffect(() => {
 
