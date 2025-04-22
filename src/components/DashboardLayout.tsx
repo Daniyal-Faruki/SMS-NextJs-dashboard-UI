@@ -9,6 +9,8 @@ import UserMenu from "@/components/UserMenu";
 import ProtectedRoute from "@/auth0Config/ProtectedRoute";
 import OrganizationSelector from "./OrganizationSelector";
 import useIsMobile from "@/hooks/useIsMobile";
+import ChevronLeft from "../assets/icons/chevron-left.svg"
+import ChevronRight from "../assets/icons/chevron-right.svg"
 
 export default function DashboardLayout({
   children,
@@ -22,19 +24,20 @@ export default function DashboardLayout({
     <ProtectedRoute>
       <div className="h-screen flex">
         <div
-          className={`relative bg-white border-r transition-all duration-300 ease-in-out flex flex-col
-          ${isSidebarCollapsed ? "w-20" : "w-72"} ${ (!isSidebarCollapsed && isMobile) ? "!w-full" : "" }`}
+          className={`relative bg-white border-r transition-all duration-300 ease-in-out flex flex-col pt-12
+  ${isSidebarCollapsed ? "w-20" : isMobile ? "w-full" : "w-72 md:min-w-64"}`}
         >
-          <button
+          <button // fix this toggle position
             onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-            className="bg-gray-200 m-2 p-3 rounded hover:bg-gray-300"
+            className="absolute bottom-40 -right-4 z-10 rounded-full hover:opacity-50" 
           >
-            {isSidebarCollapsed ? "➡️" : "⬅️"}
+            {isSidebarCollapsed ? 
+            <ChevronRight className="w-7" /> : <ChevronLeft className="w-7" />}
           </button>
           <OrganizationSelector />
           <Menu isCollapsed={isSidebarCollapsed} />
           <div className="absolute bottom-0 left-0 w-full">
-            <UserMenu  isCollapsed={isSidebarCollapsed}/>
+            <UserMenu isCollapsed={isSidebarCollapsed} />
           </div>
         </div>
 

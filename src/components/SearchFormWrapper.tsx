@@ -6,7 +6,6 @@ import AddButton from "./AddButton";
 import DialogWrapper from "./DialogWrapper";
 import ToggleGroupInput from "./ToggleGroupInput";
 import { formatDate } from "@/utils/dateUtils";
-import plusIcon from "../assets/icons/plus.svg"
 import "../styles/styles.scss";
 import { SearchFormWrapperProps } from "../models/searchFormWrapperProps.model"
 
@@ -69,7 +68,7 @@ const SearchFormWrapper: React.FC<SearchFormWrapperProps> = ({
         {canCreate && ComponentToLoad === ComponentNameEnum.Employees && (
           <AddButton
             onClick={() => openDialog(ComponentNameEnum.Employees)}
-            iconSrc={plusIcon}
+            iconSrc={true}
             label={dialogConfig.Employees.label}
             className={`addEmpBtnRes btn-add-new max-w-fit justify-self-end max-sm:max-w-full ${dialogConfig.Employees.buttonClass}`}
           />
@@ -78,7 +77,7 @@ const SearchFormWrapper: React.FC<SearchFormWrapperProps> = ({
         {canCreate && ComponentToLoad === ComponentNameEnum.EmployeeRewards && (
           <AddButton
             onClick={() => openDialog(ComponentNameEnum.EmployeeRewards)}
-            iconSrc={plusIcon}
+            iconSrc={true}
             label={dialogConfig[ComponentNameEnum.EmployeeRewards].label}
             className={`max-sm:order-1 w-fit max-sm:w-full justify-self-end btn-add-new ${dialogConfig[ComponentNameEnum.EmployeeRewards].buttonClass}`}
           />

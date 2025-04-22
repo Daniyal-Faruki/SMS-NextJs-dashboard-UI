@@ -19,6 +19,7 @@ import noImage from "../../assets/icons/noImage.jpg"
 import employeeId from "../../assets/icons/employeeId.svg"
 import email from "../../assets/icons/mail.svg"
 import Phone from "../../assets/icons/Phone.svg"
+import CustomSvgIcon from "../CustomSvgIcon";
 interface TableColumns {
   label: string;
   key: string;
@@ -88,7 +89,8 @@ const TableContent: React.FC<TableContentProps> = ({
               return (
                 <TableCell key={column.key}>
                   {icon && (
-                      <Image src={icon} className="inline mr-2" alt="app-logo" width={17} />
+                    //   <Image src={icon} className="inline mr-2" alt="app-logo" width={17} />
+                    <CustomSvgIcon Icon={icon} size={5} />
                   )}
                   {label}
                 </TableCell>

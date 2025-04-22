@@ -9,6 +9,14 @@ const nextConfig = {
     images: {
         domains: ['lh3.googleusercontent.com'],
       },
+      webpack(config) {
+        config.module.rules.push({
+          test: /\.svg$/, // ⬅️ Rule applies to files ending in .svg
+          issuer: /\.[jt]sx?$/, // ⬅️ Only if they're imported from .js, .ts, .jsx, or .tsx files
+          use: ['@svgr/webpack'], // ⬅️ Uses @svgr/webpack loader to convert SVGs into React components
+        });
+        return config;
+      },
 };
 
 export default nextConfig;

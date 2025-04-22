@@ -14,8 +14,9 @@ const OrganizationSelector = () => {
 
   return (
     <div className="mb-4 px-2">
+        <label className="text-sm">ORGANIZATION</label>
       <select
-        className="w-full text-sm border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+        className="w-full text-sm border border-gray-300 rounded-md p-5 mt-1 focus:outline-none focus:ring-2 focus:ring-cyan-500"
         onChange={handleChange}
         value={selectedOrg?.org_key || ""}
       >

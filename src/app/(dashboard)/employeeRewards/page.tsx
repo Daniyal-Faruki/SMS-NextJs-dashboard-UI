@@ -4,6 +4,7 @@ import SearchFormWrapper from "@/components/SearchFormWrapper";
 import { formatDate } from "@/utils/dateUtils"; // Assuming this is for formatting date ranges
 import { ComponentNameEnum } from "@/utils/enums"; // Assuming you have an enum for components
 import "../../../styles/styles.scss";
+import useIsMobile from "@/hooks/useIsMobile";
 
 const EmployeeRewardsPage = () => {
   const [formData, setFormData] = useState({
@@ -46,7 +47,7 @@ const EmployeeRewardsPage = () => {
   // const gridClass = "grid grid-cols-2 gap-4"; // Example grid class
   const ComponentToLoad = "Employee Rewards"; // Or dynamic based on context
   const canCreate = true; // Change this as needed
-  const isMobile = false; // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
+  const isMobile = useIsMobile(); // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
   console.log("Employee rewards Component LoADED: ");
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, searchQuery: e.target.value }));

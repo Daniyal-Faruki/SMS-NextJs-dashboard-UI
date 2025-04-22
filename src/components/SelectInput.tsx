@@ -13,8 +13,8 @@ interface Option {
 }
 
 interface SelectInputProps {
-  value: string; //| string[]; // Allow string for single select, or string[] for multi-select
-  onChange: (event: SelectChangeEvent) => void;
+  value: string | string[]; //| string[]; // Allow string for single select, or string[] for multi-select
+  onChange: (event: SelectChangeEvent<string[] | string>) => void;
   options: Option[];
   placeholder?: string;
   multiple?: boolean;
@@ -33,7 +33,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
     <FormControl fullWidth className={className}>
       <Select
         multiple={multiple}
-        value={value} // value can be string or string[] based on the multiple prop
+        value={multiple ? value || [] : value} // value can be string or string[] based on the multiple prop
         onChange={onChange}
         displayEmpty
       >

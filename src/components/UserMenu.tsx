@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { FiLogOut, FiUser } from "react-icons/fi";
-import { useUser } from '../context/UserContext';
+import { useUser } from "../context/UserContext";
 
 const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
   const [open, setOpen] = useState(false);
@@ -29,7 +29,7 @@ const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
       {/* Profile Button */}
       <div
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 cursor-pointer p-4 hover:bg-gray-100 border-t-2"
+        className="flex items-center gap-2 cursor-pointer p-3 hover:bg-gray-100 border-t-2"
       >
         <Image
           src={user?.picture} //"/avatar.png"
@@ -40,10 +40,8 @@ const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
         />
         {!isCollapsed && (
           <div>
-            <span className="text-sm hidden lg:block">{user?.name}</span>
-            <span className="text-xs hidden lg:block">
-            {user?.email}
-            </span>
+            <span className="text-sm block">{user?.name}</span>
+            <span className="text-xs">{user?.email}</span>
           </div>
         )}
       </div>
@@ -52,11 +50,19 @@ const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
       {open && (
         <div className="absolute bottom-16 left-0 w-full bg-lamaPurpleLight shadow-lg rounded-md z-10">
           <ul className="text-sm text-gray-700 p-2">
-            <li className={`flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer ${isCollapsed ? "justify-center" : ""}`}> 
+            <li
+              className={`flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer ${
+                isCollapsed ? "justify-center" : ""
+              }`}
+            >
               <FiUser className="w-8 h-auto rounded-full border-2 p-1" />
               {!isCollapsed && <span>View Profile</span>}
             </li>
-            <li className={`flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer text-red-500 ${isCollapsed ? "justify-center" : ""}`}>
+            <li
+              className={`flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer text-red-500 ${
+                isCollapsed ? "justify-center" : ""
+              }`}
+            >
               <FiLogOut className="w-8 h-auto" />
               {!isCollapsed && <span>Logout</span>}
             </li>

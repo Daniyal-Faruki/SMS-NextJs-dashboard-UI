@@ -15,7 +15,6 @@
     "@hookform/resolvers": "^5.0.1",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
-    "@svgr/webpack": "^8.1.0",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.8.4",
     "formik": "^2.4.6",
@@ -29,6 +28,7 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

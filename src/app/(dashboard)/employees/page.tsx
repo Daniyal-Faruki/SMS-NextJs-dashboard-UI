@@ -15,6 +15,7 @@ import { useApi } from "@/hooks/useApi";
 import { handleError } from "@/components/shared/errorHandler";
 import { searchEmployees } from "@/services/employeesService";
 import { useOrganization } from "@/context/OrganizationContext";
+import useIsMobile from "@/hooks/useIsMobile";
 
 interface TableColumns {
   label: string;
@@ -148,7 +149,7 @@ const EmployeesPage = () => {
   // const gridClass = "grid grid-cols-2 gap-4"; // Example grid class
   const ComponentToLoad = "Employees"; // Or dynamic based on context
   const canCreate = true; // Change this as needed
-  const isMobile = false; // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
+  const isMobile = useIsMobile(); // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, searchQuery: e.target.value }));
@@ -193,6 +194,8 @@ const EmployeesPage = () => {
     }
   };
 
+
+  // TODO Need logic implementation here 
   const handleTeamDropdown = (e: React.ChangeEvent<{ value: unknown }>) => {
     setFormData((prev) => ({ ...prev, toggleValue: e.target.value as string }));
   };

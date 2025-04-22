@@ -4,9 +4,9 @@ import { role } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import home from "../assets/icons/HomeNav.svg"
-import employees from "../assets/icons/EmployeesNav.svg"
-import employeeRewards from "../assets/icons/ScorecardsNav.svg"
+import home from "../assets/icons/HomeNav.svg";
+import employees from "../assets/icons/EmployeesNav.svg";
+import employeeRewards from "../../../SMS-NextJs-dashboard-UI/src/assets/icons/ScorecardsNav.svg"//"../assets/icons/ScorecardsNav.svg";
 
 import HomeIcon from "@/assets/icons/HomeNav.svg";
 
@@ -87,23 +87,39 @@ const Menu = ({ isCollapsed }: { isCollapsed: boolean }) => {
               const isActive = pathname === item.href; // 👈 check if current route
 
               return (
+                // <Link
+                //   href={item.href}
+                //   key={item.label}
+                //   className={`flex items-center lg:justify-start gap-4 text-gray-500 py-2 rounded-md md:p-3 mx-2 my-1 px-2 hover:bg-RpsCyan hover:text-white ${
+                //     isActive ? "bg-RpsCyan text-white" : ""
+                //   } ${isCollapsed ? "w-fit !p-4" : ""}`}
+                // >
+                //   <item.icon
+                //     className={`w-5 h-5 transition-colors ${
+                //       isActive ? "text-white" : "text-gray-500"
+                //     } group-hover:text-white`}
+                //     fill="currentColor"
+                //   />
+
+                //   {!isCollapsed && (
+                //     // className="hidden lg:block"
+                //     <span>{item.label}</span>
+                //   )}
+                // </Link>
                 <Link
                   href={item.href}
                   key={item.label}
-                  className={`flex items-center lg:justify-start gap-4 text-gray-500 py-2 rounded-md md:p-3 mx-2 my-1 px-2 hover:bg-RpsCyan hover:text-white ${
+                  className={`group flex items-center gap-4 text-gray-500 py-2 rounded-md md:p-3 mx-2 my-1 px-2 hover:bg-RpsCyan hover:text-white ${
                     isActive ? "bg-RpsCyan text-white" : ""
                   } ${isCollapsed ? "w-fit !p-4" : ""}`}
                 >
-                  <Image
-                    src={item.icon}
-                    alt={item.label}
-                    width={18}
-                    // height={18}
+                  <item.icon
+                    className={`w-5 transition-colors ${
+                      isActive ? "text-white" : "text-gray-500"
+                    } group-hover:text-white`}
+                    fill="currentColor"
                   />
-                  {!isCollapsed && (
-                    // className="hidden lg:block"
-                    <span>{item.label}</span>
-                  )}
+                  {!isCollapsed && <span>{item.label}</span>}
                 </Link>
               );
             }
