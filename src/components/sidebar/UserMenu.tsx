@@ -3,15 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { FiLogOut, FiUser } from "react-icons/fi";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../../context/UserContext";
 
 const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { user, isLoading } = useUser();
 
-  if (isLoading) return <p>Loading user...</p>; // TODO Loading Spinner etc....!
-
+  
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -19,11 +18,13 @@ const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
         setOpen(false);
       }
     };
-
+    
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
+  
+  if (isLoading) return <p>Loading user...</p>; // TODO Loading Spinner etc....!
+  
   return (
     <div className="relative" ref={menuRef}>
       {/* Profile Button */}
@@ -41,7 +42,7 @@ const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
         {!isCollapsed && (
           <div>
             <span className="text-sm block">{user?.name}</span>
-            <span className="text-xs">{user?.email}</span>
+            <span className="text-xs text-gray-500 truncate w-11/12 block">{user?.email}</span>
           </div>
         )}
       </div>

@@ -1,20 +1,41 @@
 "use client";
-import React, { useState } from "react";
-import SearchFormWrapper from "@/components/SearchFormWrapper";
+import React, { useEffect, useState } from "react";
+import SearchFormWrapper from "@/components/form-fields/SearchFormWrapper";
 import { formatDate } from "@/utils/dateUtils"; // Assuming this is for formatting date ranges
 import { ComponentNameEnum } from "@/utils/enums"; // Assuming you have an enum for components
 import "../../../styles/styles.scss";
 import useIsMobile from "@/hooks/useIsMobile";
+import TableDrawer from "@/components/table/TableDrawer";
+import { Team } from "@/models/team.model";
+import { PeriodRangeLookup } from "@/models/periodRangeLookup.model";
+import { useApi } from "@/hooks/useApi";
+import { EmployeeReward } from "@/models/employee-reward.model";
+import SpecificEmployeeRewards from "@/components/table/SpecificEmployeeRewards";
+import { getScheduleRangeLookup } from "@/services/lookupService";
+import { searchEmployeeRewards } from "@/services/employeeRewardService";
+import { handleError } from "@/components/shared/errorHandler";
+
+interface TableColumns {
+  label: string;
+  key: string;
+}
 
 const EmployeeRewardsPage = () => {
   const [formData, setFormData] = useState({
     searchQuery: "",
     toggleValue: "",
+    startDate: "",
+    endDate: "",
   });
 
   const [selectedPeriod, setSelectedPeriod] = useState({ endDate: "" });
   const [open, setOpen] = useState(false);
   const [dialogType, setDialogType] = useState<string | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]); // Use the custom Team type
+  const [employees, setEmployees] = useState<EmployeeReward[]>([]); // Use the custom Team type
+  const [periodsRange, setPeriodsRange] = useState<PeriodRangeLookup[]>([]); // Use the custom PeriodRangeLookup type
+  const [columns, setColumns] = useState<TableColumns[]>([]); // Store dynamic columns
+  const api = useApi();
 
   // Sample data for dialogConfig
   const dialogConfig = {
@@ -28,27 +49,106 @@ const EmployeeRewardsPage = () => {
     // },
   };
 
-  // Sample data for periods
-  const periodsRange = [
-    { startDate: "2023-01-01", endDate: "2023-06-30" },
-    { startDate: "2023-07-01", endDate: "2023-12-31" },
-  ];
+  // Fetch lookup data on component mount
+  useEffect(() => {
+    const getPeriodsLookup = async () => {
+      try {
+        const data = await getScheduleRangeLookup(api, "ZIN");
+        setPeriodsRange(data); // ✅ only update if still mounted
+        console.log("Periods Range in ER: ", data);
+      } catch (error: any) {
+        console.error("Error fetching schedule periods:", error);
+        // Optional: Show snackbar
+        // setSnackbarMessage("Failed to load schedule periods.");
+        // setSnackbarSeverity("error");
+        // setOpenSnackbar(true);
+      }
+    };
 
-  // Sample data for teams
-  const teams = [
-    { teamName: "Team A", teamUid: "team-a" },
-    { teamName: "Team B", teamUid: "team-b" },
-    { teamName: "Team C", teamUid: "team-c" },
-    { teamName: "Team D", teamUid: "team-d" },
-    { teamName: "Team E", teamUid: "team-e" },
-    { teamName: "Team F", teamUid: "team-f" },
-  ];
+    getPeriodsLookup();
+  }, []); // Empty dependency array means this runs only once, on component mount
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchEmployeeRewards = async () => {
+      try {
+        const payload = {
+          searchString: formData.searchQuery,
+          teams:
+            formData.toggleValue.length === 1 && formData.toggleValue[0] === ""
+              ? null
+              : formData.toggleValue,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+        };
+        const data = await searchEmployeeRewards(api, "ZIN", payload);
+        console.log("Employee Rewards Data: ", data);
+        if (isMounted) {
+          setEmployees(data);
+          if (payload.searchString === "" && payload.teams === "") {
+            // Extract unique teams from employee data
+            const teamNames = filterAvailableTeams(data);
+            console.log("teams for filter: ", teamNames);
+            setTeams(teamNames as Team[]); // Set unique team names to state
+          }
+          setColumns([
+            { label: "Employee", key: "employeeName" },
+            // { label: "Employee ID", key: "employeeId" },
+            // { label: "Email", key: "email" },
+            // { label: "Employment Status", key: "employmentStatus" },
+            { label: "Team", key: "teamName" },
+            // { label: "Role", key: "roleName" },
+            // { label: "Phone No", key: "phoneNo" },
+            // { label: "Joining Date", key: "joiningDate" },
+            { label: "Total", key: "total" },
+          ]);
+        }
+      } catch (error) {
+        const errorHandlerMessage = handleError(error);
+        if (isMounted) {
+          // setOpenSnackbar(true);
+          // setSnackbarSeverity("error");
+          // setSnackbarMessage(errorHandlerMessage);
+        }
+      }
+    };
+
+    fetchEmployeeRewards();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [formData.searchQuery, formData.toggleValue]);
+
+  // this method can be put into shared
+  const filterAvailableTeams = (
+    data: EmployeeReward[]
+  ): { teamName: string; teamUid: string }[] => {
+    const TEAM_NAME_SET = new Set<string>();
+
+    return data
+      .filter(({ teamName, teamUid }) => {
+        // ✅ Ensure both fields exist
+        if (!teamName || !teamUid) return false;
+
+        if (TEAM_NAME_SET.has(teamName)) {
+          return false;
+        }
+
+        TEAM_NAME_SET.add(teamName);
+        return true;
+      })
+      .map(({ teamName, teamUid }) => ({
+        teamName: teamName as string,
+        teamUid: teamUid as string,
+      }));
+  };
 
   // const gridClass = "grid grid-cols-2 gap-4"; // Example grid class
   const ComponentToLoad = "Employee Rewards"; // Or dynamic based on context
   const canCreate = true; // Change this as needed
   const isMobile = useIsMobile(); // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
-  console.log("Employee rewards Component LoADED: ");
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, searchQuery: e.target.value }));
   };
@@ -85,7 +185,8 @@ const EmployeeRewardsPage = () => {
   };
 
   return (
-    <div className="">
+    <div className="flex flex-col gap-y-8">
+      <span className="text-4xl font-semibold">{ComponentToLoad}</span>
       <SearchFormWrapper
         formData={formData}
         handleSearchChange={handleSearchChange}
@@ -111,6 +212,24 @@ const EmployeeRewardsPage = () => {
         teams={teams}
         handleFormat={handleFormat}
         handleTeamDropdown={handleTeamDropdown}
+      />
+      <TableDrawer
+        data={employees}
+        columns={columns}
+        organizationKey="ZIN"
+        reloadTable={() => console.log("Reloading...")}
+        ComponentToLoad={ComponentNameEnum.EmployeeRewards}
+        startDate=""
+        endDate=""
+        DrawerComponent={({ selectedRow, ...rest }) => (
+          // <UpdateEmployee employee={selectedRow as Employee} {...rest} />
+          <SpecificEmployeeRewards
+            employeeUid={selectedRow.employeeUid ?? null}
+            startDate={formData.startDate}
+            endDate={formData.endDate}
+            {...rest}
+          />
+        )}
       />
     </div>
   );

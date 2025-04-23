@@ -9,7 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import LoadingSplash from "@/components/LoadingSplash";
+import LoadingSplash from "@/components/shared/LoadingSplash";
 
 type UserContextType = {
   user: any;

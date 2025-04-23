@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
 import Button from "@mui/material/Button";
-import Image from "next/image";
-import PlusIcon from "../assets/icons/plus.svg"
+import PlusIcon from "../../assets/icons/plus.svg"
 
 interface Props {
   onClick: () => void;

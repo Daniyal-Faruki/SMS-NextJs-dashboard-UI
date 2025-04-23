@@ -1,13 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import SearchFormWrapper from "@/components/SearchFormWrapper";
+import SearchFormWrapper from "@/components/form-fields/SearchFormWrapper";
 import { ComponentNameEnum } from "@/utils/enums"; // Assuming you have an enum for components
 import "../../../styles/styles.scss";
 import TableDrawer from "@/components/table/TableDrawer";
 import { Employee } from "@/models/Employee.model";
 import { ColumnDef } from "@tanstack/react-table";
 import UpdateEmployee from "@/components/table/UpdateEmployee";
-import AddEmployeeDialog from "@/components/FormsDialog/AddEmployeeDialog";
+import AddEmployeeDialog from "@/components/forms-dialog/AddEmployeeDialog";
 import { Team } from "@/models/team.model";
 import { PeriodRangeLookup } from "@/models/periodRangeLookup.model";
 import { getScheduleRangeLookup } from "@/services/lookupService";

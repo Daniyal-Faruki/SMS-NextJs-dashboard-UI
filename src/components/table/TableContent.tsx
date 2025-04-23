@@ -15,33 +15,34 @@ import { EmployeeReward } from "@/models/employee-reward.model";
 import { ComponentNameEnum, RoleTypeEnum } from "@/utils/enums";
 import { formatDate } from "@/utils/dateUtils";
 import Image from "next/image";
-import noImage from "../../assets/icons/noImage.jpg"
-import employeeId from "../../assets/icons/employeeId.svg"
-import email from "../../assets/icons/mail.svg"
-import Phone from "../../assets/icons/Phone.svg"
-import CustomSvgIcon from "../CustomSvgIcon";
+import noImage from "../../assets/icons/noImage.jpg";
+import employeeId from "../../assets/icons/employeeId.svg";
+import email from "../../assets/icons/mail.svg";
+import Phone from "../../assets/icons/Phone.svg";
+import CustomSvgIcon from "../shared/CustomSvgIcon";
+
 interface TableColumns {
   label: string;
   key: string;
 }
 
-interface TableContentProps {
-  data: (Employee | EmployeeReward)[];
+interface TableContentProps<T> {
+  data: T[];
   columns: { label: string; key: string }[]; // Column configuration//ColumnDef<TableColumns>[];
-  onRowClick: (row: Employee | EmployeeReward) => void;
+  onRowClick: (row: T) => void;
   organizationKey: string;
   reloadTable: () => void;
   ComponentToLoad: ComponentNameEnum;
 }
 
-const TableContent: React.FC<TableContentProps> = ({
+const TableContent = <T extends Record<string, any>>({
   data,
   columns,
   onRowClick,
   organizationKey,
   reloadTable,
   ComponentToLoad,
-}) => {
+}: TableContentProps<T>) => {
   return (
     <TableContainer
       component={Paper}
@@ -59,9 +60,8 @@ const TableContent: React.FC<TableContentProps> = ({
         >
           <TableRow>
             {columns.map((column) => {
-            //   if (column.key === "employeeId") return null; // add mobile check here isMobile
-
-            //   if (column.key === "total") return null; // add mobile check here isMobile
+              //   if (column.key === "employeeId") return null; // add mobile check here isMobile
+              //   if (column.key === "total") return null; // add mobile check here isMobile
 
               // Conditionally render 'job status' if the column label is 'employment status'
               const label =
@@ -144,13 +144,18 @@ const TableContent: React.FC<TableContentProps> = ({
                       </div>
                     ) 
                     : column.key === "employeeId" ? ( // add mobile check here isMobile --> && !isMobile
-                      // Check for Role column
                       <span>{row.employeeId}</span>
                     ) 
                     : column.key === "roleName" && "roleName" in row ? (
                       // Check for Role column
-                      <span className={RoleTypeEnum[row.roleName as keyof typeof RoleTypeEnum]  || ""}>
-                        {(row as Employee).roleName}
+                      <span
+                        className={
+                          RoleTypeEnum[
+                            row.roleName as keyof typeof RoleTypeEnum
+                          ] || ""
+                        }
+                      >
+                        {row.roleName}
                       </span>
                     ) 
                     : column.key === "joiningDate" && "joiningDate" in row && row.joiningDate ? (
@@ -158,8 +163,8 @@ const TableContent: React.FC<TableContentProps> = ({
                       <span>{formatDate(row.joiningDate)}</span>
                     ) 
                     : (
-                        <span>
-                        {(row as any)[column.key as keyof (Employee & EmployeeReward)]}
+                      <span>
+                        {row[column.key] ?? "-"}
                       </span>
                     )}
                   </TableCell>

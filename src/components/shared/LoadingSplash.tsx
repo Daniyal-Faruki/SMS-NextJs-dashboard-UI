@@ -1,4 +1,4 @@
-import "../.././src/app/globals.css";
+import "../../styles/styles.scss";
 
 // components/LoadingSplash.tsx
 export default function LoadingSplash() {

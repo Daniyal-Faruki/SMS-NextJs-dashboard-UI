@@ -3,25 +3,23 @@ import React, { useState } from "react";
 import TableContent from "./TableContent";
 import { ComponentNameEnum } from "@/utils/enums";
 import { SnackbarProvider } from "../shared/SnackbarContext";
-import { Employee } from "@/models/Employee.model";
-import { EmployeeReward } from "@/models/employee-reward.model";
-import type { ColumnDef } from "@tanstack/react-table";
 
 interface TableColumns {
-	label: string;
-	key: string;
+  label: string;
+  key: string;
 }
 
-interface TableDrawerProps {
-  data: (Employee | EmployeeReward)[];
-  columns: { label: string; key: string }[]; // Column configuration//ColumnDef<TableColumns>[];
+// ✅ Add constraint here
+interface TableDrawerProps<T extends Record<string, any>> {
+  data: T[];
+  columns: TableColumns[];
   organizationKey: string;
   reloadTable: () => void;
   ComponentToLoad: ComponentNameEnum;
   startDate: string;
   endDate: string;
   DrawerComponent: React.ComponentType<{
-    selectedRow: Employee | EmployeeReward;
+    selectedRow: T;
     onClose: () => void;
     organizationKey: string;
     reloadTable: () => void;
@@ -30,7 +28,8 @@ interface TableDrawerProps {
   }>;
 }
 
-const TableDrawer: React.FC<TableDrawerProps> = ({
+// ✅ Add constraint here
+const TableDrawer = <T extends Record<string, any>>({
   data,
   columns,
   organizationKey,
@@ -39,10 +38,10 @@ const TableDrawer: React.FC<TableDrawerProps> = ({
   startDate,
   endDate,
   DrawerComponent,
-}) => {
-  const [selectedRow, setSelectedRow] = useState<Employee | EmployeeReward | null>(null);
+}: TableDrawerProps<T>) => {
+  const [selectedRow, setSelectedRow] = useState<T | null>(null);
 
-  const handleRowClick = (row: Employee | EmployeeReward) => {
+  const handleRowClick = (row: T) => {
     setSelectedRow(row);
   };
 
