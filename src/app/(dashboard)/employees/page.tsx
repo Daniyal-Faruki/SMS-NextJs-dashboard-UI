@@ -16,6 +16,9 @@ import { handleError } from "@/components/shared/errorHandler";
 import { searchEmployees } from "@/services/employeesService";
 import { useOrganization } from "@/context/OrganizationContext";
 import useIsMobile from "@/hooks/useIsMobile";
+import useAuth0Roles from "@/hooks/useAuth0Roles";
+import ProtectedRoute from "@/auth0Config/ProtectedRoute";
+import { getPermissions } from "@/utils/roles-permissions-access";
 
 interface TableColumns {
   label: string;
@@ -33,32 +36,16 @@ const EmployeesPage = () => {
   const [dialogType, setDialogType] = useState<string | null>(null);
   const [teams, setTeams] = useState<Team[]>([]); // Use the custom Team type
   const [employees, setEmployees] = useState<Employee[]>([]); // Use the custom Team type
-  const [periodsRange, setPeriodsRange] = useState<PeriodRangeLookup[]>([]); // Use the custom PeriodRangeLookup type
+  // const [periodsRange, setPeriodsRange] = useState<PeriodRangeLookup[]>([]); // Use the custom PeriodRangeLookup type
   const [columns, setColumns] = useState<TableColumns[]>([]); // Store dynamic columns
   const api = useApi();
   const { selectedOrg } = useOrganization();
-
-  // console.log("Selected Organization: ", selectedOrg);
-  // Fetch lookup data on component mount
-  useEffect(() => {
-
-    const getPeriodsLookup = async () => {
-      try {
-        const data = await getScheduleRangeLookup(api, "ZIN");
-          setPeriodsRange(data); // ✅ only update if still mounted
-          console.log("Periods Range: ", data);
-      } catch (error: any) {
-        console.error("Error fetching schedule periods:", error);
-        // Optional: Show snackbar
-        // setSnackbarMessage("Failed to load schedule periods.");
-        // setSnackbarSeverity("error");
-        // setOpenSnackbar(true);
-      }
-    };
-
-    getPeriodsLookup();
-
-  }, []); // Empty dependency array means this runs only once, on component mount
+  const [userAccessRoles, setUserAccessRoles] = useState<string[]>([]); 
+  const userRoles =  useAuth0Roles();
+  const { canView, canEdit, canCreate, canDelete, hasOrgAdminRole, hasRpsAdminRole, hasSysAdminRole,hasUserRole } = getPermissions(userRoles.roles);
+  console.log("useAuth0Roles: ", getPermissions(userRoles.roles));
+  
+  // TODO Here I'll check for roles and make api request accordingly
 
   useEffect(() => {
     let isMounted = true;
@@ -71,7 +58,7 @@ const EmployeesPage = () => {
               ? null
               : formData.toggleValue,
         };
-        const data = await searchEmployees(api, "ZIN", payload);
+        const data = await searchEmployees(api, "ZIN", payload); // selectedOrg.org_Key will come here instead of "ZIN"
 
         if (isMounted) {
           setEmployees(data);
@@ -148,7 +135,7 @@ const EmployeesPage = () => {
 
   // const gridClass = "grid grid-cols-2 gap-4"; // Example grid class
   const ComponentToLoad = "Employees"; // Or dynamic based on context
-  const canCreate = true; // Change this as needed
+  const can_Create = true; // Change this as needed
   const isMobile = useIsMobile(); // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -201,6 +188,7 @@ const EmployeesPage = () => {
   };
 
   return (
+    <ProtectedRoute requiredRoles={['sys-admin', 'rps-admin', 'org-admin']}> {/* Protect this page with roles */}
     <div className="flex flex-col gap-y-8">
       <span className="text-4xl font-semibold">{ComponentToLoad}</span>
       <SearchFormWrapper
@@ -210,7 +198,7 @@ const EmployeesPage = () => {
         // gridClass={gridClass}
         ComponentToLoad={ComponentToLoad}
         ComponentNameEnum={ComponentNameEnum}
-        canCreate={canCreate}
+        canCreate={can_Create}
         openDialog={openDialog}
         dialogConfig={dialogConfig}
         open={open}
@@ -223,7 +211,7 @@ const EmployeesPage = () => {
         setSnackbarSeverity={() => {}}
         selectedPeriod={selectedPeriod}
         handleSelectChange={handleSelectChange}
-        periodsRange={periodsRange}
+        periodsRange={[]}
         isMobile={isMobile}
         teams={teams}
         handleFormat={handleFormat}
@@ -242,6 +230,7 @@ const EmployeesPage = () => {
         )}
       />
     </div>
+    </ProtectedRoute>
   );
 };
 

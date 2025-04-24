@@ -14,6 +14,7 @@ import SpecificEmployeeRewards from "@/components/table/SpecificEmployeeRewards"
 import { getScheduleRangeLookup } from "@/services/lookupService";
 import { searchEmployeeRewards } from "@/services/employeeRewardService";
 import { handleError } from "@/components/shared/errorHandler";
+import ProtectedRoute from "@/auth0Config/ProtectedRoute";
 
 interface TableColumns {
   label: string;
@@ -185,6 +186,7 @@ const EmployeeRewardsPage = () => {
   };
 
   return (
+    <ProtectedRoute requiredRoles={['sys-admin', 'rps-admin', 'org-admin', 'user']}> {/* Protect this page with roles */}
     <div className="flex flex-col gap-y-8">
       <span className="text-4xl font-semibold">{ComponentToLoad}</span>
       <SearchFormWrapper
@@ -232,6 +234,7 @@ const EmployeeRewardsPage = () => {
         )}
       />
     </div>
+    </ProtectedRoute>
   );
 };
 

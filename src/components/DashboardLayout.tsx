@@ -19,9 +19,9 @@ export default function DashboardLayout({
 }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
-
+  
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRoles={['sys-admin', 'rps-admin', 'org-admin', 'user']}>
       <div className="h-screen flex">
         {/* LEFT */}
         <div

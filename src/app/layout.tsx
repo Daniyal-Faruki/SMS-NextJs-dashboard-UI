@@ -8,8 +8,8 @@ import { UserProvider } from "@/context/UserContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lama Dev School Management Dashboard",
-  description: "Next.js School Management System",
+  title: "Reward Point System - RPS",
+  description: "Next.js - RPS",
 };
 
 export default function RootLayout({

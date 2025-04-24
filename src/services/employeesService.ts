@@ -19,3 +19,13 @@ export const searchEmployees = async (
   );
   return response.data;
 };
+ 
+export const fetchEmployeeLookups = async (
+  api: AxiosInstance,
+  organizationKey: string
+): Promise<any> => {
+  const response =  await api.get(
+    `/api/v1/organizations/${organizationKey}/lookup/GetEmployeeLookups`
+  );
+  return response.data;
+}

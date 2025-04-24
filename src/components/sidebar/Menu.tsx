@@ -1,12 +1,14 @@
 "use client";
 import useIsMobile from "@/hooks/useIsMobile";
-import { role } from "@/lib/data";
+// import { role } from "@/lib/data";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import home from "../../assets/icons/HomeNav.svg";
 import employees from "../../assets/icons/EmployeesNav.svg";
 import employeeRewards from "../../assets/icons/ScorecardsNav.svg"//"../assets/icons/ScorecardsNav.svg";
 
+// Here i can handle routes, by getting roles from auth0.
+let role = "org-admin" // "user";
 
 const menuItems = [
   {
@@ -22,13 +24,13 @@ const menuItems = [
         icon: employees,
         label: "Employees",
         href: "/employees",
-        visible: ["admin", "teacher"],
+        visible: ["org-admin", "rps-admin", "sys-admin"],
       },
       {
         icon: employeeRewards,
         label: "Employee Rewards",
         href: "/employeeRewards",
-        visible: ["admin", "teacher"],
+        visible: ["org-admin", "rps-admin", "sys-admin", "user"],
       }
     ],
   },
@@ -50,25 +52,6 @@ const Menu = ({ isCollapsed }: { isCollapsed: boolean }) => {
               const isActive = pathname === item.href; // 👈 check if current route
 
               return (
-                // <Link
-                //   href={item.href}
-                //   key={item.label}
-                //   className={`flex items-center lg:justify-start gap-4 text-gray-500 py-2 rounded-md md:p-3 mx-2 my-1 px-2 hover:bg-RpsCyan hover:text-white ${
-                //     isActive ? "bg-RpsCyan text-white" : ""
-                //   } ${isCollapsed ? "w-fit !p-4" : ""}`}
-                // >
-                //   <item.icon
-                //     className={`w-5 h-5 transition-colors ${
-                //       isActive ? "text-white" : "text-gray-500"
-                //     } group-hover:text-white`}
-                //     fill="currentColor"
-                //   />
-
-                //   {!isCollapsed && (
-                //     // className="hidden lg:block"
-                //     <span>{item.label}</span>
-                //   )}
-                // </Link>
                 <Link
                   href={item.href}
                   key={item.label}

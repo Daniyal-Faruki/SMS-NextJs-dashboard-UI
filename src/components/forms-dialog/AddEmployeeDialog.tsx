@@ -17,6 +17,10 @@ import Cross from '../../assets/icons/cross.svg';//'../../../assets/icons/cross.
 import axios from 'axios';
 import { handleError } from '@/components/shared/errorHandler';
 import { useAuthHeaders } from '@/hooks/useAxiosWithAuth';
+import { fetchEmployeeLookups } from '@/services/employeesService';
+import { useApi } from '@/hooks/useApi';
+import { Team } from "@/models/team.model";
+import { EmployeeLookup } from '@/models/employeeLookup.model';
 
 // Interface for the Employee Form Values
 interface EmployeeFormValues {
@@ -62,37 +66,40 @@ const AddEmployeeDialog = ({
   setSnackbarSeverity
 }: AddEmployeeDialogProps) => {
     const { getAuthHeaders } = useAuthHeaders(); // Using the custom hook
-  const [lookups, setLookups] = useState({
-    jobStatuses: [],
+  const [lookups, setLookups] = useState<EmployeeLookup>({
+    employmentStatuses: [],
     roles: [],
     teams: []
   });
-  
+  const api = useApi();
   const [loading, setLoading] = useState(true);
   console.log("Add Employee Form", open)
   // Fetch employee lookup data
-  const fetchEmployeeLookups = async (organizationKey: string) => { debugger
-    try {
-      const headers = await getAuthHeaders(); // If you have a custom header hook
-      const response = await fetch(`API_URL/${organizationKey}/lookup/GetEmployeeLookups`, { headers });
-      const data = await response.json();
-      return data;
-    //   return { employmentStatuses: [], roles: [], teams: [] }; // Mocked response
-    } catch (error) {
-      throw error;
-    }
-  };
+  // const fetchEmployeeLookups = async (organizationKey: string) => {
+  //   try {
+  //     const headers = await getAuthHeaders(); // If you have a custom header hook
+  //     const response = await fetch(`API_URL/${organizationKey}/lookup/GetEmployeeLookups`, { headers });
+  //     const data = await response.json();
+  //     return data;
+  //   //   return { employmentStatuses: [], roles: [], teams: [] }; // Mocked response
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // };
 
   useEffect(() => {
     if (open) {
       const loadResources = async () => {
         try {
-          const data = await fetchEmployeeLookups(organizationKey);
+          const data = await fetchEmployeeLookups(api,organizationKey);
+          console.log("Employee Lookups Data: ", data);
           setLookups({
-            jobStatuses: [],//data.employmentStatuses.map(({ description }) => description),
+            employmentStatuses: [],//data.employmentStatuses.map(({ description }) => description),
             roles: data.roles,
             teams: data.teams
           });
+
+          console.log("setLookups Employee Data: ", lookups);
           setLoading(false);
         } catch (error) {
           const errorHandlerMessage = handleError(error);
@@ -191,7 +198,8 @@ const AddEmployeeDialog = ({
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle className="flex justify-between items-center w-full bg-white">
         <span className="flex-grow addNewDialogTitle">Add Employee</span>
-        <img className="icon-size-22 cursor-pointer" src={Cross} alt="Close Icon" onClick={handleClose} />
+        {/* <img className="icon-size-22 cursor-pointer" src={Cross} alt="Close Icon" onClick={handleClose} /> */}
+        <Cross className="w-5 cursor-pointer"  onClick={handleClose}/>
       </DialogTitle>
       <DialogContent className="bg-white">
         <form onSubmit={handleSubmit(onSubmit)} className="justify-self-center w-full max-sm:w-full md:w-1/3 lg:w-1/5">

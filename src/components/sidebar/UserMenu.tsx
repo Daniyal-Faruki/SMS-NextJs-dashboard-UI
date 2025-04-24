@@ -4,13 +4,23 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { FiLogOut, FiUser } from "react-icons/fi";
 import { useUser } from "../../context/UserContext";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { user, isLoading } = useUser();
+  const { logout } = useAuth0(); // Use the logout function from the Auth0 SDK
 
-  
+  // Handle logout
+  const handleLogout = () => {
+    logout({
+      logoutParams: {
+        returnTo: window.location.origin, // Redirect to the current origin after logout
+      },
+    });
+  };
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -18,13 +28,13 @@ const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
         setOpen(false);
       }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  
+
   if (isLoading) return <p>Loading user...</p>; // TODO Loading Spinner etc....!
-  
+
   return (
     <div className="relative" ref={menuRef}>
       {/* Profile Button */}
@@ -42,7 +52,9 @@ const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
         {!isCollapsed && (
           <div>
             <span className="text-sm block">{user?.name}</span>
-            <span className="text-xs text-gray-500 truncate w-11/12 block">{user?.email}</span>
+            <span className="text-xs text-gray-500 truncate w-11/12 block">
+              {user?.email}
+            </span>
           </div>
         )}
       </div>
@@ -65,7 +77,7 @@ const UserMenu = ({ isCollapsed }: { isCollapsed: boolean }) => {
               }`}
             >
               <FiLogOut className="w-8 h-auto" />
-              {!isCollapsed && <span>Logout</span>}
+              {!isCollapsed && <span onClick={handleLogout}>Logout</span>}
             </li>
           </ul>
         </div>

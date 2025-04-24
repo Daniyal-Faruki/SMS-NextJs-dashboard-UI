@@ -1,40 +1,54 @@
-// // hooks/useRoles.js
-// import { useState, useEffect } from 'react';
-// import { useAuth0 } from '@auth0/auth0-react';
-// import jwtDecode from 'jwt-decode';
-// import { environment } from '@/environments/environment';
+import { useState, useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import { jwtDecode } from 'jwt-decode'; // Correct import using named export
+import { environment } from '@/environments/environment';
+import { JwtPayload } from 'jwt-decode'; // Import JwtPayload
 
-// const useAuth0Roles = () => {
-// 	const { isAuthenticated, getAccessTokenSilently } = useAuth0();
-// 	const [roles, setRoles] = useState([]);
-// 	// const [permissions, setPermissions] = useState([]);
+// Define the type for the JWT payload
+interface CustomJwtPayload extends JwtPayload {
+  'https://custom.ziniot.com/roles'?: string[];  // Custom roles claim
+  permissions?: string[];  // Custom permissions claim
+}
 
-// 	useEffect(() => {
-// 		const fetchRoles = async () => {
-// 			if (isAuthenticated) {
-// 				try {
-// 					const token = await getAccessTokenSilently({
-// 						authorizationParams: {
-// 							audience: environment.auth.authorizationParams.audience // Value in Identifier field for the API being called.
-// 							// scope: 'read:posts', // Scope that exists for the API being called. You can create these through the Auth0 Management API or through the Auth0 Dashboard in the Permissions view of your API.
-// 						}
-// 					});
-// 					const decodedToken = jwtDecode(token);
-// 					const userRoles = decodedToken['https://custom.ziniot.com/roles'] || [];
-// 					// const userPermissions = decodedToken[`permissions`]; // Custom claim (if set)
-// 					setRoles(userRoles);
-// 				} catch (error) {
-// 					console.error('Error fetching roles:', error);
-// 				}
-// 			}
-// 		};
+const useAuth0Roles = () => {
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const [roles, setRoles] = useState<string[]>([]);
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [error, setError] = useState<Error | null>(null);
 
-// 		if (isAuthenticated) {
-// 			fetchRoles();
-// 		}
-// 	}, [isAuthenticated, getAccessTokenSilently]);
+  useEffect(() => {
+    const fetchRoles = async () => {
+      if (isAuthenticated) {
+        try {
+          const token = await getAccessTokenSilently({
+            authorizationParams: {
+              audience: environment.auth.authorizationParams.audience,
+            },
+          });
 
-// 	return roles;
-// };
+          // Decode the token with the custom type
+          const decodedToken = jwtDecode<CustomJwtPayload>(token);
 
-// export default useAuth0Roles;
+          // Access custom claims with proper types
+          const userRoles = decodedToken['https://custom.ziniot.com/roles'] || [];
+          const userPermissions = decodedToken['permissions'] || [];
+
+          setRoles(userRoles);
+          setPermissions(userPermissions);
+
+        } catch (error) {
+          console.error('Error fetching roles:', error);
+          setError(error instanceof Error ? error : new Error('Unknown error'));
+        }
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchRoles();
+    }
+  }, [isAuthenticated, getAccessTokenSilently]);
+
+  return { roles, permissions, error };
+};
+
+export default useAuth0Roles;
