@@ -829,7 +829,79 @@ mat-pseudo-checkbox {
     font-family: 'Sora', sans-serif;
 } 
 
-// select Dropdown global 
-.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input{
-    padding: 9px 13px !important;
+
+
+// update employees 
+.update-employees-fields {
+    overflow-y: auto;
+    max-height: 70vh; /* Default for larger screens */
 }
+
+@media (max-width: 768px) {
+    .update-employees-fields {
+        max-height: 80vh; /* More space on mobile */
+    }
+  }
+  
+  // select Dropdown global 
+  .css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input{
+      padding: 9px 13px !important;
+  }
+
+.selectFieldWrapper { 
+    // background-color: aqua;
+    border: 1px solid rgba(62, 175, 63, 1);
+    // .MuiOutlinedInput-root {
+    //   & .MuiOutlinedInput-notchedOutline {
+    //     border-color: #62af3f; /* Default green border */
+  
+    //     // Hover state
+    //     &:hover {
+    //       border-color: #62af3f;
+    //     }
+  
+    //     // Focus state
+    //     &.Mui-focused {
+    //       border-color: #62af3f;
+    //     }
+    //   }
+  
+    //   .MuiSelect-select {
+    //     padding-left: 10px;
+    //     padding-right: 30px;
+    //   }
+  
+    //   .MuiSvgIcon-root {
+    //     color: #62af3f; /* Default green icon color */
+    //   }
+    // }
+  
+    // If there is an error
+    &.select-input-error {
+      .MuiOutlinedInput-root {
+        & .MuiOutlinedInput-notchedOutline {
+          border-color: #e68888; /* Red border on error */
+  
+          // Hover state on error
+          &:hover {
+            border-color: #e68888;
+          }
+  
+          // Focus state on error
+          &.Mui-focused {
+            border-color: #e68888;
+          }
+        }
+  
+        .MuiSelect-select {
+          padding-left: 10px;
+          padding-right: 30px;
+        }
+  
+        .MuiSvgIcon-root {
+          color: #e68888; /* Red icon on error */
+        }
+      }
+    }
+  }
+  
