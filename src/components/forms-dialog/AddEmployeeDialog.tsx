@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Dialog,
   DialogActions,
@@ -25,6 +25,7 @@ import {
 import { handleError } from "@/components/shared/errorHandler";
 import { useAuthHeaders } from "@/hooks/useAxiosWithAuth";
 import { EmployeeLookup } from "@/models/employeeLookup.model";
+import debounce from "lodash.debounce";
 
 interface EmployeeFormValues {
   email: string;
@@ -130,38 +131,105 @@ const AddEmployeeDialog = ({
     if (open) {
       loadResources();
     }
-  }, [open, organizationKey, api, setOpenSnackbar, setSnackbarMessage, setSnackbarSeverity]);
+  }, [
+    open,
+    organizationKey,
+    api,
+    setOpenSnackbar,
+    setSnackbarMessage,
+    setSnackbarSeverity,
+  ]);
 
   // Handle email change directly with logging
-  const handleEmailChange = async (value: string) => {
-    console.log("Email field changed:", value);
-    // You can call your API to check if the email exists here
-    if (value) {
-      try {
-        const exists = await checkIfEmployeeEmailExists(api, organizationKey, value);
-        console.log("Email Exits: ", exists);
-        if (!exists.data) {
-          setError("email", { type: "manual", message: "Email already exists" });
-          console.log("Email Set Error: ");
-        } else if(exists.data) {
-          console.log("Email Remove Error: ");
-          clearErrors("email");
+  // const handleEmailChange = async (value: string) => {
+  //   console.log("Email field changed:", value);
+  //   // You can call your API to check if the email exists here
+  //   if (value) {
+  //     try {
+  //       const exists = await checkIfEmployeeEmailExists(api, organizationKey, value);
+  //       console.log("Email Exits: ", exists);
+  //       if (exists) {
+  //         setError("email", { type: "manual", message: "Email already exists" });
+  //         console.log("Email Set Error: ", exists);
+  //       } else {
+  //         console.log("Email Remove Error: ");
+  //         clearErrors("email");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error checking email:", error);
+  //     }
+  //   }
+  // };
+
+  const debouncedCheckEmail = useCallback(
+    debounce(async (value: string) => {
+      console.log("Debounced Email Check:", value);
+      if (value) {
+        try {
+          const exists = await checkIfEmployeeEmailExists(
+            api,
+            organizationKey,
+            value
+          );
+          console.log("Email Exists:", exists);
+          if (exists) {
+            setError("email", {
+              type: "manual",
+              message: "Email already exists",
+            });
+          } else {
+            clearErrors("email");
+          }
+        } catch (error) {
+          console.error("Error checking email:", error);
         }
-      } catch (error) {
-        console.error("Error checking email:", error);
       }
-    }
+    }, 300),
+    []
+  );
+
+  const handleEmailChange = (value: string) => {
+    console.log("Email field changed:", value);
+    debouncedCheckEmail(value);
   };
 
   // Handle employeeId change directly with logging
-  const handleEmployeeIdChange = async (value: string) => {
-    console.log("Employee ID field changed:", value);
-    // You can call your API to check if the employeeId exists here
+  // const handleEmployeeIdChange = async (value: string) => {
+  //   console.log("Employee ID field changed:", value);
+  //   // You can call your API to check if the employeeId exists here
+  //   if (value) {
+  //     try {
+  //       const exists = await checkIfEmployeeIdExists(
+  //         api,
+  //         organizationKey,
+  //         value
+  //       );
+  //       if (exists) {
+  //         setError("employeeId", {
+  //           type: "manual",
+  //           message: "Employee ID already exists",
+  //         });
+  //       } else {
+  //         clearErrors("employeeId");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error checking Employee ID:", error);
+  //     }
+  //   }
+  // };
+
+  // Debounced version of the Employee ID checker
+const debouncedCheckEmployeeId = useCallback(
+  debounce(async (value: string) => {
+    console.log("Debounced Employee ID Check:", value);
     if (value) {
       try {
         const exists = await checkIfEmployeeIdExists(api, organizationKey, value);
-        if (!exists.data) {
-          setError("employeeId", { type: "manual", message: "Employee ID already exists" });
+        if (exists) {
+          setError("employeeId", {
+            type: "manual",
+            message: "Employee ID already exists",
+          });
         } else {
           clearErrors("employeeId");
         }
@@ -169,14 +237,25 @@ const AddEmployeeDialog = ({
         console.error("Error checking Employee ID:", error);
       }
     }
-  };
+  }, 300),
+  []
+);
+
+// This function gets called on input change
+const handleEmployeeIdChange = (value: string) => {
+  console.log("Employee ID field changed:", value);
+  debouncedCheckEmployeeId(value);
+};
 
   const onSubmit = async (data: EmployeeFormValues) => {
+    debugger;
     try {
       const employeeData = {
         ...data,
         joiningDate: new Date(data.joiningDate).toISOString().split("T")[0],
       };
+      console.log("Submit Employee Data: ", employeeData);
+
       setOpenSnackbar(true);
       setSnackbarMessage("Employee Added Successfully");
       setSnackbarSeverity("success");
@@ -209,11 +288,16 @@ const AddEmployeeDialog = ({
         <Cross onClick={handleClose} className="w-5 cursor-pointer" />
       </DialogTitle>
       <DialogContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="justify-self-center w-full max-sm:w-full md:w-1/3 lg:w-1/5">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="justify-self-center w-full max-sm:w-full md:w-1/3 lg:w-1/5"
+        >
           <FormGroup className="flex flex-col gap-y-3">
             {/* Email Field */}
             <FormControl error={Boolean(errors.email)}>
-              <span className="block text-sm font-medium text-gray-700">Email *</span>
+              <span className="block text-sm font-medium text-gray-700">
+                Email *
+              </span>
               <Controller
                 name="email"
                 control={control}
@@ -231,12 +315,16 @@ const AddEmployeeDialog = ({
                   />
                 )}
               />
-              {errors.email && <FormHelperText>{errors.email.message}</FormHelperText>}
+              {errors.email && (
+                <FormHelperText>{errors.email.message}</FormHelperText>
+              )}
             </FormControl>
 
             {/* Employee Name Field */}
             <FormControl error={Boolean(errors.employeeName)}>
-              <span className="block text-sm font-medium text-gray-700">Employee Name *</span>
+              <span className="block text-sm font-medium text-gray-700">
+                Employee Name *
+              </span>
               <Controller
                 name="employeeName"
                 control={control}
@@ -250,12 +338,16 @@ const AddEmployeeDialog = ({
                   />
                 )}
               />
-              {errors.employeeName && <FormHelperText>{errors.employeeName.message}</FormHelperText>}
+              {errors.employeeName && (
+                <FormHelperText>{errors.employeeName.message}</FormHelperText>
+              )}
             </FormControl>
 
             {/* Employee ID Field */}
             <FormControl error={Boolean(errors.employeeId)}>
-              <span className="block text-sm font-medium text-gray-700">Employee ID *</span>
+              <span className="block text-sm font-medium text-gray-700">
+                Employee ID *
+              </span>
               <Controller
                 name="employeeId"
                 control={control}
@@ -273,66 +365,117 @@ const AddEmployeeDialog = ({
                   />
                 )}
               />
-              {errors.employeeId && <FormHelperText>{errors.employeeId.message}</FormHelperText>}
+              {errors.employeeId && (
+                <FormHelperText>{errors.employeeId.message}</FormHelperText>
+              )}
             </FormControl>
 
             {/* Employment Status Field */}
             <FormControl error={Boolean(errors.employmentStatus)}>
-              <span className="block text-sm font-medium text-gray-700">Employment Status *</span>
+              <span className="block text-sm font-medium text-gray-700">
+                Employment Status *
+              </span>
               <Controller
                 name="employmentStatus"
                 control={control}
                 render={({ field }) => (
-                  <Select {...field} fullWidth variant="outlined" size="small" displayEmpty>
-                    <MenuItem value="" disabled>Select Job Status</MenuItem>
+                  <Select
+                    {...field}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Select Job Status
+                    </MenuItem>
                     {lookups.employmentStatuses.map((status) => (
-                      <MenuItem key={status.description} value={status.description}>{status.description}</MenuItem>
+                      <MenuItem
+                        key={status.description}
+                        value={status.description}
+                      >
+                        {status.description}
+                      </MenuItem>
                     ))}
                   </Select>
                 )}
               />
-              {errors.employmentStatus && <FormHelperText>{errors.employmentStatus.message}</FormHelperText>}
+              {errors.employmentStatus && (
+                <FormHelperText>
+                  {errors.employmentStatus.message}
+                </FormHelperText>
+              )}
             </FormControl>
 
             {/* Role Field */}
             <FormControl error={Boolean(errors.roleUid)}>
-              <span className="block text-sm font-medium text-gray-700">Role *</span>
+              <span className="block text-sm font-medium text-gray-700">
+                Role *
+              </span>
               <Controller
                 name="roleUid"
                 control={control}
                 render={({ field }) => (
-                  <Select {...field} fullWidth variant="outlined" size="small" displayEmpty>
-                    <MenuItem value="" disabled>Select Role</MenuItem>
+                  <Select
+                    {...field}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Select Role
+                    </MenuItem>
                     {lookups.roles.map((role) => (
-                      <MenuItem key={role.uid} value={role.uid}>{role.roleName}</MenuItem>
+                      <MenuItem key={role.uid} value={role.uid}>
+                        {role.roleName}
+                      </MenuItem>
                     ))}
                   </Select>
                 )}
               />
-              {errors.roleUid && <FormHelperText>{errors.roleUid.message}</FormHelperText>}
+              {errors.roleUid && (
+                <FormHelperText>{errors.roleUid.message}</FormHelperText>
+              )}
             </FormControl>
 
             {/* Team Field */}
             <FormControl error={Boolean(errors.teamUid)}>
-              <span className="block text-sm font-medium text-gray-700">Team *</span>
+              <span className="block text-sm font-medium text-gray-700">
+                Team *
+              </span>
               <Controller
                 name="teamUid"
                 control={control}
                 render={({ field }) => (
-                  <Select {...field} fullWidth variant="outlined" size="small" displayEmpty>
-                    <MenuItem value="" disabled>Select Team</MenuItem>
+                  <Select
+                    {...field}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Select Team
+                    </MenuItem>
                     {lookups.teams.map((team) => (
-                      <MenuItem key={team.teamName} value={team.uid}>{team.teamName}</MenuItem>
+                      <MenuItem key={team.teamName} value={team.uid}>
+                        {team.teamName}
+                      </MenuItem>
                     ))}
                   </Select>
                 )}
               />
-              {errors.teamUid && <FormHelperText>{errors.teamUid.message}</FormHelperText>}
+              {errors.teamUid && (
+                <FormHelperText>{errors.teamUid.message}</FormHelperText>
+              )}
             </FormControl>
 
             {/* Joining Date Field */}
             <FormControl error={Boolean(errors.joiningDate)}>
-              <span className="block text-sm font-medium text-gray-700">Joining Date *</span>
+              <span className="block text-sm font-medium text-gray-700">
+                Joining Date *
+              </span>
               <Controller
                 name="joiningDate"
                 control={control}
@@ -350,12 +493,16 @@ const AddEmployeeDialog = ({
                   />
                 )}
               />
-              {errors.joiningDate && <FormHelperText>{errors.joiningDate.message}</FormHelperText>}
+              {errors.joiningDate && (
+                <FormHelperText>{errors.joiningDate.message}</FormHelperText>
+              )}
             </FormControl>
 
             {/* Phone Number Field */}
             <FormControl error={Boolean(errors.phoneNo)}>
-              <span className="block text-sm font-medium text-gray-700">Phone Number *</span>
+              <span className="block text-sm font-medium text-gray-700">
+                Phone Number *
+              </span>
               <Controller
                 name="phoneNo"
                 control={control}
@@ -369,12 +516,22 @@ const AddEmployeeDialog = ({
                   />
                 )}
               />
-              {errors.phoneNo && <FormHelperText>{errors.phoneNo.message}</FormHelperText>}
+              {errors.phoneNo && (
+                <FormHelperText>{errors.phoneNo.message}</FormHelperText>
+              )}
             </FormControl>
 
             <DialogActions className="mt-4">
-              <Button onClick={handleClose} className="btn-white">Cancel</Button>
-              <Button type="submit" disabled={!isValid} className={`btn-add-new ${!(isValid) ? 'btn-add-new-disabled cursor-not-allowed' : ''}`}>
+              <Button onClick={handleClose} className="btn-white">
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!isValid}
+                className={`btn-add-new ${
+                  !isValid ? "btn-add-new-disabled cursor-not-allowed" : ""
+                }`}
+              >
                 Add Employee
               </Button>
             </DialogActions>

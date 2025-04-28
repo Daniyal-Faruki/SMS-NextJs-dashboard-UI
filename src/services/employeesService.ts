@@ -39,7 +39,7 @@ export const checkIfEmployeeEmailExists = async (
   const response =  await api.get(
     `/api/v1/organizations/${organizationKey}/employees/${email}/check-email`
   );
-  return response.data;
+  return !response.data;
 }
 
 export const checkIfEmployeeIdExists = async (
@@ -50,5 +50,5 @@ export const checkIfEmployeeIdExists = async (
   const response =  await api.get(
     `/api/v1/organizations/${organizationKey}/employees/${employeeId}/check-employee-id`
   );
-  return response.data;
+  return !response.data;
 }
