@@ -5,7 +5,7 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    './context/**/*.{js,ts,jsx,tsx}', // 👈 just in case
+    "./context/**/*.{js,ts,jsx,tsx}", // 👈 just in case
   ],
   theme: {
     extend: {
@@ -21,8 +21,12 @@ const config: Config = {
         lamaPurpleLight: "#F1F0FF",
         lamaYellow: "#FAE27C",
         lamaYellowLight: "#FEFCE8",
-        RpsCyan: "#019CCC"
-      }
+        RpsCyan: "#019CCC",
+        fieldFocused: "rgba(0, 39, 87, 1)",
+        fieldDefault: "rgba(217, 221, 220, 1)",
+        fieldSuccess: "rgba(62, 175, 63, 1)",
+        fieldError: "rgba(230, 136, 136, 1)",
+      },
     },
   },
   plugins: [],

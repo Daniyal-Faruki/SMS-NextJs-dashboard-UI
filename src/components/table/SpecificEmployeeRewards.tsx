@@ -87,7 +87,7 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
   }, [employeeUid, startDate, endDate]);
 
   return (
-    <div className="p-4 w-full max-w-[500px]">
+    <div className="p-4 w-full max-w-96 border rounded-xl ">
       <div className="flex justify-between items-center mb-4">
         <Typography variant="h6">Employee Rewards</Typography>
         <IconButton onClick={onClose}>
@@ -111,24 +111,6 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
       )}
 
       {!loading && rewards.length > 0 && (
-        // <div className="flex flex-col gap-2">
-        //   {rewards.map((reward, index) => (
-        //     <Paper key={index} className="p-3 border border-gray-200">
-        //       <Typography>
-        //         <strong>Points:</strong> {reward.points}
-        //       </Typography>
-        //       <Typography>
-        //         <strong>Type:</strong> {reward.reward}
-        //       </Typography>
-        //       <Typography>
-        //         {/* <strong>Date:</strong> {format(new Date(reward.assignedAt), 'dd MMM yyyy')} */}
-        //       </Typography>
-        //       <Typography>
-        //         <strong>Note:</strong> {reward.reason || "N/A"}
-        //       </Typography>
-        //     </Paper>
-        //   ))}
-        // </div>
         <div className="">
           <div className="flex items-center gap-x-2">
             <Image src={noImage} alt="app-logo" width={32} height={32} />
@@ -145,7 +127,7 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
                 {rewards.map((item, index) => (
                   <div className="inner-div mt-1" key={index}>
                     <div className="line-container">
-                      <PointBullet className="w-3" />
+                      <PointBullet className="w-3 h-3" />
                       <div className="vertical-line"></div>
                     </div>
                     <div className="achievementDetails ">
@@ -163,7 +145,7 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
                             {item.points}
                           </span>
                         </div>
-
+                    {/* // TODO */}
                         {/* {item.reward !== "Bonus" &&
                           checkDeleteEditRewardValidity(item.periodUid) &&
                           canEdit &&

@@ -127,6 +127,11 @@ const UpdateEmployee: React.FC<UpdateEmployeeProps> = ({
 
   const debouncedCheckEmail = useCallback(
     debounce(async (value: string) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(value)) {
+        return; // Skip API call if invalid email
+      }
       if (value && value !== employee.email) {
         try {
           const exists = await checkIfEmployeeEmailExists(
@@ -153,7 +158,7 @@ const UpdateEmployee: React.FC<UpdateEmployeeProps> = ({
 
   const debouncedCheckEmployeeId = useCallback(
     debounce(async (value: string) => {
-      if (value && value !== employee.employeeId) {
+      if (value && value !== employee.employeeId && value.length >= 8) {
         try {
           const exists = await checkIfEmployeeIdExists(
             api,
@@ -172,6 +177,8 @@ const UpdateEmployee: React.FC<UpdateEmployeeProps> = ({
         } catch (error) {
           console.error("Error checking Employee ID:", error);
         }
+      } else {
+        clearErrors("employeeId");
       }
     }, 300),
     []
@@ -192,7 +199,7 @@ const UpdateEmployee: React.FC<UpdateEmployeeProps> = ({
   };
 
   return (
-    <Box className="p-1 lg:w-96 border rounded-xl ">
+    <Box className="p-1 w-full max-w-96 border rounded-xl ">
       <div className="flex justify-end">
         <MuiIconButton size="small" onClick={onClose}>
           <CloseIcon />
@@ -234,6 +241,9 @@ const UpdateEmployee: React.FC<UpdateEmployeeProps> = ({
           error={!!errors.email}
           helperText={errors.email?.message}
           required={true}
+          onChange={(e) => {
+            debouncedCheckEmail(e.target.value);
+          }}
         />
         {/* <FormControl error={Boolean(errors.email)}>
           <span className="block text-sm font-medium text-gray-700">
@@ -266,6 +276,9 @@ const UpdateEmployee: React.FC<UpdateEmployeeProps> = ({
           error={!!errors.employeeId}
           helperText={errors.employeeId?.message}
           required={true}
+          onChange={(e) => {
+            debouncedCheckEmployeeId(e.target.value);
+          }}
         />
 
         {/* <FormControl error={Boolean(errors.employeeId)}>

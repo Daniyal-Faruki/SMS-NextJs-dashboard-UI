@@ -65,7 +65,6 @@ const EmployeesPage = () => {
           if (payload.searchString === "" && payload.teams === "") {
             // Extract unique teams from employee data
             const teamNames = filterAvailableTeams(data);
-            console.log("teams for filter: ", teamNames);
             setTeams(teamNames as Team[]); // Set unique team names to state
           }
           setColumns([

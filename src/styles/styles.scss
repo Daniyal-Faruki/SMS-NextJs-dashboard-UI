@@ -5,6 +5,10 @@ $color-cyan: rgba(0, 156, 204, 1);
 $color-white: rgba(255, 255, 255, 1);
 $color-dark-purple: rgba(0, 39, 87, 1);
 $state-invalid-btn: rgba(169, 170, 172, 1);
+$field-focused: rgba(0, 39, 87, 1);
+$field-default: rgba(217, 221, 220, 1);
+$field-success: rgba(62, 175, 63, 1);
+$field-error: rgba(230, 136, 136, 1);
 
 @mixin common-btn-colors($background, $color) {
     background-color: $background !important;
@@ -438,14 +442,14 @@ mat-pseudo-checkbox {
 }
 
 // vertical nav items
-.fuse-Vertical-nav-items{
+.fuse-Vertical-nav-items {
     font-family: 'Sora', sans-serif;
     font-weight: 500 !important;
     font-size: 14px !important;
     line-height: 15.7px !important;
     letter-spacing: 0.25px !important;
     vertical-align: middle !important;
-} 
+}
 
 .muiltr-axo9lw-MuiTypography-root {
     font-family: 'Sora', sans-serif;
@@ -690,9 +694,10 @@ mat-pseudo-checkbox {
 
 //w-full max-sm:order-2 justify-self-start
 .genericSearch {
-    .css-16wblaj-MuiInputBase-input-MuiOutlinedInput-input{
+    .css-16wblaj-MuiInputBase-input-MuiOutlinedInput-input {
         padding: 9px 12px;
     }
+
     width: 100%; // Corresponds to w-full
     justify-self: start; // Corresponds to justify-self-start
 
@@ -827,81 +832,67 @@ mat-pseudo-checkbox {
     padding-top: 10px;
     padding-bottom: 10px;
     font-family: 'Sora', sans-serif;
-} 
+}
 
 
 
 // update employees 
 .update-employees-fields {
     overflow-y: auto;
-    max-height: 70vh; /* Default for larger screens */
+    max-height: 70vh;
+    /* Default for larger screens */
 }
 
 @media (max-width: 768px) {
     .update-employees-fields {
-        max-height: 80vh; /* More space on mobile */
+        max-height: 80vh;
+        /* More space on mobile */
     }
-  }
-  
-  // select Dropdown global 
-  .css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input{
-      padding: 9px 13px !important;
-  }
+}
 
-.selectFieldWrapper { 
-    // background-color: aqua;
-    border: 1px solid rgba(62, 175, 63, 1);
-    // .MuiOutlinedInput-root {
-    //   & .MuiOutlinedInput-notchedOutline {
-    //     border-color: #62af3f; /* Default green border */
-  
-    //     // Hover state
-    //     &:hover {
-    //       border-color: #62af3f;
-    //     }
-  
-    //     // Focus state
-    //     &.Mui-focused {
-    //       border-color: #62af3f;
-    //     }
-    //   }
-  
-    //   .MuiSelect-select {
-    //     padding-left: 10px;
-    //     padding-right: 30px;
-    //   }
-  
-    //   .MuiSvgIcon-root {
-    //     color: #62af3f; /* Default green icon color */
-    //   }
-    // }
-  
+// select Dropdown global 
+.css-w76bbz-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input {
+    padding: 9px 13px !important;
+}
+
+.selectFieldWrapper {
+    fieldset {
+        border-color: rgba(62, 175, 63, 1); // or any style you want
+    }
+
+    &:hover fieldset {
+        border-color: rgba(62, 175, 63, 1) !important; // on hover
+    }
+
+    &.Mui-focused fieldset {
+        // border-color: green !important; // when focused
+        border: 1px solid rgba(62, 175, 63, 1) !important;
+    }
+
+    .MuiSvgIcon-root {
+        color: rgba(62, 175, 63, 1);
+        /* Default green icon color */
+    }
+
+
     // If there is an error
     &.select-input-error {
-      .MuiOutlinedInput-root {
-        & .MuiOutlinedInput-notchedOutline {
-          border-color: #e68888; /* Red border on error */
-  
-          // Hover state on error
-          &:hover {
-            border-color: #e68888;
-          }
-  
-          // Focus state on error
-          &.Mui-focused {
-            border-color: #e68888;
-          }
+        fieldset {
+            border-color: rgba(230, 136, 136, 1); // or any style you want
         }
-  
-        .MuiSelect-select {
-          padding-left: 10px;
-          padding-right: 30px;
+
+        &:hover fieldset {
+            border-color: rgba(230, 136, 136, 1) !important; // on hover
         }
-  
+
+        &.Mui-focused fieldset {
+            // border-color: green !important; // when focused
+            border: 1px solid rgba(230, 136, 136, 1) !important;
+        }
+
         .MuiSvgIcon-root {
-          color: #e68888; /* Red icon on error */
+            color: rgba(230, 136, 136, 1);
+            /* Red icon on error */
         }
-      }
     }
-  }
-  
+}

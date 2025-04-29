@@ -15,6 +15,7 @@ import { getScheduleRangeLookup } from "@/services/lookupService";
 import { searchEmployeeRewards } from "@/services/employeeRewardService";
 import { handleError } from "@/components/shared/errorHandler";
 import ProtectedRoute from "@/auth0Config/ProtectedRoute";
+import AddEmployeeRewardDialog from "@/components/forms-dialog/AddUpdateEmployeeRewardDialog";
 
 interface TableColumns {
   label: string;
@@ -43,6 +44,7 @@ const EmployeeRewardsPage = () => {
     "Employee Rewards": {
       label: "Add Reward",
       buttonClass: "btn-add-new",
+      component: AddEmployeeRewardDialog,
     },
     // EmployeeRewards: {
     //   label: "Add Reward",
@@ -56,7 +58,7 @@ const EmployeeRewardsPage = () => {
       try {
         const data = await getScheduleRangeLookup(api, "ZIN");
         setPeriodsRange(data); // ✅ only update if still mounted
-        console.log("Periods Range in ER: ", data);
+        // console.log("Periods Range in ER: ", data);
       } catch (error: any) {
         console.error("Error fetching schedule periods:", error);
         // Optional: Show snackbar
@@ -68,57 +70,41 @@ const EmployeeRewardsPage = () => {
 
     getPeriodsLookup();
   }, []); // Empty dependency array means this runs only once, on component mount
+  
+  const fetchEmployeeRewards = async () => {
+    try {
+      const payload = {
+        searchString: formData.searchQuery,
+        teams:
+          formData.toggleValue.length === 1 && formData.toggleValue[0] === ""
+            ? null
+            : formData.toggleValue,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+      };
+      const data = await searchEmployeeRewards(api, "ZIN", payload);
+      // console.log("Employee Rewards Data: ", data);
+        setEmployees(data);
+        if (payload.searchString === "" && payload.teams === "") {
+          // Extract unique teams from employee data
+          const teamNames = filterAvailableTeams(data);
+          setTeams(teamNames as Team[]); // Set unique team names to state
+        }
+        setColumns([
+          { label: "Employee", key: "employeeName" },
+          { label: "Team", key: "teamName" },
+          { label: "Total", key: "total" },
+        ]);
+    } catch (error) {
+      const errorHandlerMessage = handleError(error);
+        // setOpenSnackbar(true);
+        // setSnackbarSeverity("error");
+        // setSnackbarMessage(errorHandlerMessage);
+    }
+  };
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchEmployeeRewards = async () => {
-      try {
-        const payload = {
-          searchString: formData.searchQuery,
-          teams:
-            formData.toggleValue.length === 1 && formData.toggleValue[0] === ""
-              ? null
-              : formData.toggleValue,
-          startDate: formData.startDate,
-          endDate: formData.endDate,
-        };
-        const data = await searchEmployeeRewards(api, "ZIN", payload);
-        console.log("Employee Rewards Data: ", data);
-        if (isMounted) {
-          setEmployees(data);
-          if (payload.searchString === "" && payload.teams === "") {
-            // Extract unique teams from employee data
-            const teamNames = filterAvailableTeams(data);
-            console.log("teams for filter: ", teamNames);
-            setTeams(teamNames as Team[]); // Set unique team names to state
-          }
-          setColumns([
-            { label: "Employee", key: "employeeName" },
-            // { label: "Employee ID", key: "employeeId" },
-            // { label: "Email", key: "email" },
-            // { label: "Employment Status", key: "employmentStatus" },
-            { label: "Team", key: "teamName" },
-            // { label: "Role", key: "roleName" },
-            // { label: "Phone No", key: "phoneNo" },
-            // { label: "Joining Date", key: "joiningDate" },
-            { label: "Total", key: "total" },
-          ]);
-        }
-      } catch (error) {
-        const errorHandlerMessage = handleError(error);
-        if (isMounted) {
-          // setOpenSnackbar(true);
-          // setSnackbarSeverity("error");
-          // setSnackbarMessage(errorHandlerMessage);
-        }
-      }
-    };
-
     fetchEmployeeRewards();
-
-    return () => {
-      isMounted = false;
-    };
   }, [formData.searchQuery, formData.toggleValue]);
 
   // this method can be put into shared
@@ -175,6 +161,7 @@ const EmployeeRewardsPage = () => {
 
   const reloadTable = () => {
     console.log("Table reloaded");
+    fetchEmployeeRewards();
   };
 
   const handleFormat = (e: any, newVal: string) => {
@@ -202,7 +189,7 @@ const EmployeeRewardsPage = () => {
         open={open}
         dialogType={dialogType}
         closeDialog={closeDialog}
-        organizationKey="org-123"
+        organizationKey="ZIN"
         reloadTable={reloadTable}
         setOpenSnackbar={() => {}}
         setSnackbarMessage={() => {}}
