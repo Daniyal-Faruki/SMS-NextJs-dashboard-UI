@@ -1,4 +1,5 @@
 "use client";
+import { EmployeeReward } from "@/models/employee-reward.model";
 import React from "react";
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
     };
   };
   [key: string]: any;
+  rewardToEdit?: EmployeeReward | null;
 }
 
 const DialogWrapper: React.FC<Props> = ({
@@ -20,6 +22,7 @@ const DialogWrapper: React.FC<Props> = ({
   onClose,
   dialogType,
   dialogConfig,
+  rewardToEdit,
   ...props
 }) => {
   if (!dialogType || !dialogConfig[dialogType]?.component) return null;
@@ -30,6 +33,7 @@ const DialogWrapper: React.FC<Props> = ({
     <DialogComponent
       open={open}
       handleClose={onClose}
+      rewardToEdit={rewardToEdit}
       {...props}
     />
   );

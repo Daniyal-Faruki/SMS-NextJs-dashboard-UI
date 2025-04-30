@@ -18,6 +18,7 @@ const SearchFormWrapper: React.FC<SearchFormWrapperProps> = ({
   ComponentNameEnum,
   canCreate,
   openDialog,
+  rewardToEdit,
   dialogConfig,
   open,
   dialogType,
@@ -90,6 +91,7 @@ const SearchFormWrapper: React.FC<SearchFormWrapperProps> = ({
           dialogConfig={dialogConfig}
           organizationKey={organizationKey}
           reloadTable={reloadTable}
+          rewardToEdit={rewardToEdit} 
           setOpenSnackbar={setOpenSnackbar}
           setSnackbarMessage={setSnackbarMessage}
           setSnackbarSeverity={setSnackbarSeverity}

@@ -1,3 +1,5 @@
+import { EmployeeReward } from "./employee-reward.model";
+
 export interface SearchFormWrapperProps {
     formData: any;
     handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -23,4 +25,5 @@ export interface SearchFormWrapperProps {
     teams: any[];
     handleFormat: (e: any, newVal: string) => void;
     handleTeamDropdown: (e: any) => void;
+    rewardToEdit?: EmployeeReward;
   }

@@ -29,7 +29,7 @@ const EmployeeRewardsPage = () => {
     startDate: "",
     endDate: "",
   });
-
+  
   const [selectedPeriod, setSelectedPeriod] = useState({ endDate: "" });
   const [open, setOpen] = useState(false);
   const [dialogType, setDialogType] = useState<string | null>(null);
@@ -38,7 +38,11 @@ const EmployeeRewardsPage = () => {
   const [periodsRange, setPeriodsRange] = useState<PeriodRangeLookup[]>([]); // Use the custom PeriodRangeLookup type
   const [columns, setColumns] = useState<TableColumns[]>([]); // Store dynamic columns
   const api = useApi();
-
+  const ComponentToLoad = "Employee Rewards"; // Or dynamic based on context
+  const canCreate = true; // Change this as needed
+  const isMobile = useIsMobile(); // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
+  const [editReward, setEditReward] = useState<EmployeeReward>();
+  
   // Sample data for dialogConfig
   const dialogConfig = {
     "Employee Rewards": {
@@ -131,10 +135,6 @@ const EmployeeRewardsPage = () => {
       }));
   };
 
-  // const gridClass = "grid grid-cols-2 gap-4"; // Example grid class
-  const ComponentToLoad = "Employee Rewards"; // Or dynamic based on context
-  const canCreate = true; // Change this as needed
-  const isMobile = useIsMobile(); // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, searchQuery: e.target.value }));
@@ -149,10 +149,13 @@ const EmployeeRewardsPage = () => {
     setSelectedPeriod(period);
   };
 
-  const openDialog = (type: string) => {
-    setDialogType(type);
-    setOpen(true);
-  };
+  const openDialog = (type: string, rewardData?: EmployeeReward) => {
+    console.log("Employee reward to edit: ",rewardData );
+    
+  setDialogType(type);
+  setEditReward(rewardData);
+  setOpen(true);
+};
 
   const closeDialog = () => {
     setOpen(false);
@@ -186,6 +189,7 @@ const EmployeeRewardsPage = () => {
         canCreate={canCreate}
         openDialog={openDialog}
         dialogConfig={dialogConfig}
+        rewardToEdit={editReward}
         open={open}
         dialogType={dialogType}
         closeDialog={closeDialog}
@@ -216,6 +220,7 @@ const EmployeeRewardsPage = () => {
             employeeUid={selectedRow.employeeUid ?? null}
             startDate={formData.startDate}
             endDate={formData.endDate}
+            openDialogForEdit={(reward) => openDialog("Employee Rewards", reward)}
             {...rest}
           />
         )}

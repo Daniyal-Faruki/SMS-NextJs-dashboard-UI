@@ -26,6 +26,7 @@ import SelectFieldWrapper from "../form-fields/select-input-field-wrapper";
 import { formatDate } from "@/utils/dateUtils";
 import NoUser from "../../assets/icons/noImage.jpg";
 import Image from "next/image";
+import { EmployeeReward } from "@/models/employee-reward.model";
 
 interface AddRewardFormValues {
   employeeUid: string;
@@ -47,6 +48,7 @@ interface AddEmployeeRewardDialogProps {
   setSnackbarSeverity: (
     severity: "success" | "error" | "warning" | "info"
   ) => void;
+  rewardToEdit?: EmployeeReward;
 }
 
 const rewardSchema: Yup.ObjectSchema<AddRewardFormValues> = Yup.object({
@@ -67,6 +69,7 @@ const AddEmployeeRewardDialog = ({
   setOpenSnackbar,
   setSnackbarMessage,
   setSnackbarSeverity,
+  rewardToEdit
 }: AddEmployeeRewardDialogProps) => {
   const api = useApi();
   const [lookups, setLookups] = useState<EmployeeRewardLookup>({
@@ -105,7 +108,7 @@ const AddEmployeeRewardDialog = ({
         const data = await fetchEmployeeRewardsLookups(api, organizationKey);
         setLookups(data);
         // If there are periods, set the first one as default
-        if (data.periods?.length > 0) {
+        if (data.periods?.length > 0 && !rewardToEdit) {
           // formik.setFieldValue('period', lookupData.periods[0].uid);
           setValue("periodUid", data.periods[0].uid);
         }
@@ -122,6 +125,22 @@ const AddEmployeeRewardDialog = ({
       loadResources();
     }
   }, [open]);
+
+  console.log("Reward To Edit: ", rewardToEdit);
+  
+  useEffect(() => {
+    if (rewardToEdit) {
+      reset({
+        employeeUid: rewardToEdit.employeeUid ?? "",
+        employeeName: rewardToEdit.employeeName ?? "",
+        email: rewardToEdit.email ?? "",
+        teamUid: rewardToEdit.teamUid ?? "",
+        periodUid: rewardToEdit.periodUid ?? "",
+        rewardUid: rewardToEdit.rewardUid ?? "",
+        remarks: rewardToEdit.reason ?? "",
+      });
+    }
+  }, [rewardToEdit, reset]);
 
   useEffect(() => {
     const selectedEmployee = lookups.employees.find(
