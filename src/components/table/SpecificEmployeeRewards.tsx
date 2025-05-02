@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { CircularProgress, Typography, IconButton, Paper } from "@mui/material";
+import { CircularProgress, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { EmployeeReward } from "@/models/employee-reward.model";
 import { handleError } from "../shared/errorHandler";
-import { fetchEmployeeRewardsLookups, specificEmployeeRewards } from "@/services/employeeRewardService";
+import {
+  fetchEmployeeRewardsLookups,
+  specificEmployeeRewards,
+} from "@/services/employeeRewardService";
 import { useApi } from "@/hooks/useApi";
 import { formatDate } from "@/utils/dateUtils";
 import noImage from "../../assets/icons/noImage.jpg";
@@ -13,11 +16,9 @@ import PointBullet from "../../assets/icons/pointBullet.svg";
 import Calender from "../../assets/icons/calender.svg";
 import User from "../../assets/icons/user.svg";
 import Image from "next/image";
-import { getScheduleRangeLookup } from "@/services/lookupService";
-import { PeriodRangeLookup } from "@/models/periodRangeLookup.model";
 import { Period } from "@/models/period.model";
-import EditPencil from "../../assets/icons/edit-pencil.svg"
-import TrashRed from "../../assets/icons/trash-red.svg"
+import EditPencil from "../../assets/icons/edit-pencil.svg";
+import TrashRed from "../../assets/icons/trash-red.svg";
 
 interface Props {
   employeeUid: string | null;
@@ -38,7 +39,7 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
   organizationKey,
   reloadTable,
   onClose,
-  openDialogForEdit
+  openDialogForEdit,
 }) => {
   const [rewards, setRewards] = useState<EmployeeReward[]>([]);
   const [periodsRange, setPeriodsRange] = useState<Period[]>([]); // Use the custom PeriodRangeLookup type
@@ -47,6 +48,8 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
   const api = useApi();
   const [totalPoints, setTotalPoints] = useState(0);
   //   const { getAuthHeaders } = useAuthHeaders();
+console.log("Start DAte: ", startDate);
+console.log("End DAte: ", endDate);
 
   const fetchEmployeeRewards = async () => {
     try {
@@ -59,66 +62,68 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
         startDate: startDate,
         endDate: endDate,
       };
+      console.log("specificEmployeeRewards payload: ", payload);
+      
       const data = await specificEmployeeRewards(api, "ZIN", payload);
       // console.log("Specific Employee-Rewards Data: ", data);
-        // setEmployees(data);
-        // ✅ Calculate total reward points
-        const totalPoints = data.reduce(
-          (sum: number, reward: EmployeeReward) => {
-            return sum + (reward.points || 0); // Safe fallback if points is undefined
-          },
-          0
-        );
-        setTotalPoints(totalPoints);
-        setRewards(data);
+      // setEmployees(data);
+      // ✅ Calculate total reward points
+      const totalPoints = data.reduce((sum: number, reward: EmployeeReward) => {
+        return sum + (reward.points || 0); // Safe fallback if points is undefined
+      }, 0);
+      setTotalPoints(totalPoints);
+      setRewards(data);
     } catch (error) {
       const errorHandlerMessage = handleError(error);
       console.log("Error SpecificEmployeeRewards: ", error);
-        // setOpenSnackbar(true);
-        // setSnackbarSeverity("error");
-        // setSnackbarMessage(errorHandlerMessage);
+      // setOpenSnackbar(true);
+      // setSnackbarSeverity("error");
+      // setSnackbarMessage(errorHandlerMessage);
     }
   };
 
   const loadEmployeeRewardsLookups = async () => {
     try {
       const data = await fetchEmployeeRewardsLookups(api, organizationKey);
-      console.log("fetchEmployeeRewardsLookups Data: ", data);
-      
+
       setPeriodsRange(data.periods);
-     
-      // reset(); // Reset with default values after lookups load
     } catch (error) {
       const errorHandlerMessage = handleError(error);
       // setOpenSnackbar(true);
       // setSnackbarSeverity("error");
       // setSnackbarMessage(errorHandlerMessage);
-      console.log("fetchEmployeeRewardsLookups error: ",error);
-      
+      console.log("fetchEmployeeRewardsLookups error: ", error);
     }
   };
 
   useEffect(() => {
+    // TODO
     // if (hasRpsAdminRole || hasOrgAdminRole || hasSysAdminRole) {
-		// 	getEmployeeRewardsLookup(organizationKey);
-		// }
+    // 	getEmployeeRewardsLookup(organizationKey);
+    // }
     fetchEmployeeRewards();
     loadEmployeeRewardsLookups();
   }, [employeeUid, startDate, endDate]);
 
   const checkDeleteEditRewardValidity = (periodUid: string) => {
-		// Check the value of periods
-		if (!rewards || !Array.isArray(rewards)) {
-			return false; // Return false if periods is undefined or not an array
-		}
+    // Check the value of periods
+    if (!rewards || !Array.isArray(rewards)) {
+      return false; // Return false if periods is undefined or not an array
+    }
 
-		return periodsRange.some((period) => period.uid === periodUid);
-	};
+    return periodsRange.some((period) => period.uid === periodUid);
+  };
 
   return (
     <div className="p-4 w-full max-w-96 border rounded-xl ">
       <div className="flex justify-between items-center mb-4">
-        <Typography variant="h6">Employee Rewards</Typography>
+        {/* <Typography variant="h6">Employee Rewards</Typography> */}
+        {rewards.length > 0 && (
+          <div className="flex items-center gap-x-2">
+            <Image src={noImage} alt="app-logo" width={56} height={56} className="rounded-full"/>
+            <span className="editSidenavName">{rewards[0].employeeName}</span>
+          </div>
+        )}
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
@@ -141,10 +146,10 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
 
       {!loading && rewards.length > 0 && (
         <div className="">
-          <div className="flex items-center gap-x-2">
+          {/* <div className="flex items-center gap-x-2">
             <Image src={noImage} alt="app-logo" width={32} height={32} />
             <span className="editSidenavName">{rewards[0].employeeName}</span>
-          </div>
+          </div> */}
 
           <div className="mt-4 max-sm:mt-1">
             <div className="editRewards">
@@ -174,12 +179,11 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
                             {item.points}
                           </span>
                         </div>
-                    {/* // TODO */}
+                        {/* // TODO */}
                         {item.reward !== "Bonus" &&
-                          checkDeleteEditRewardValidity(item.periodUid!) &&
-                          // canEdit &&
-                          // canDelete && 
-                          (
+                          checkDeleteEditRewardValidity(item.periodUid!) && (
+                            // canEdit &&
+                            // canDelete &&
                             <div className="flex gap-x-2">
                               <button
                                 // onClick={(
@@ -210,9 +214,9 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
                         <div>
                           <p>Achievement</p>
                           {/* <!-- class "achievement" removing this capsule color class --> */}
-                            <span className="specific-rewards-data">
-                              {item.reward}
-                            </span>
+                          <span className="specific-rewards-data">
+                            {item.reward}
+                          </span>
                         </div>
                         <div>
                           <p>

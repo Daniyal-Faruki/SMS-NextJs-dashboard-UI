@@ -126,8 +126,6 @@ const AddEmployeeRewardDialog = ({
     }
   }, [open]);
 
-  console.log("Reward To Edit: ", rewardToEdit);
-  
   useEffect(() => {
     if (rewardToEdit) {
       reset({
@@ -306,6 +304,7 @@ const AddEmployeeRewardDialog = ({
             )}
 
             {/* Period */}
+            {lookups.periods.length > 0 && (
             <FormControl error={Boolean(errors.periodUid)}>
               <span className="text-sm font-medium">Period *</span>
               <Controller
@@ -330,8 +329,10 @@ const AddEmployeeRewardDialog = ({
                 <FormHelperText>{errors.periodUid.message}</FormHelperText>
               )}
             </FormControl>
+            )}
 
             {/* Reward */}
+            {lookups.teams.length > 0 && (
             <FormControl error={Boolean(errors.rewardUid)}>
               <span className="text-sm font-medium">Achievement *</span>
               <Controller
@@ -358,6 +359,7 @@ const AddEmployeeRewardDialog = ({
                 <FormHelperText>{errors.rewardUid.message}</FormHelperText>
               )}
             </FormControl>
+            )}
 
             {/* Remarks */}
             <InputFieldWrapper

@@ -19,7 +19,7 @@ export default function ProtectedRoute({
   requiredRoles = [],
   children,
 }: ProtectedRouteProps) {
-  const { isAuthenticated, getAccessTokenSilently, isLoading } = useAuth0();
+  const { isAuthenticated, getAccessTokenSilently, isLoading, loginWithRedirect } = useAuth0();
   const [accessChecked, setAccessChecked] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
 
@@ -59,7 +59,12 @@ export default function ProtectedRoute({
   }
 
   if (!hasAccess) { // Must be showing an Error Page here 
-    return <div>You do not have access to this page.</div>;
+    console.log("You do not have access to this page. (ProtectedRoute)");
+    
+    setTimeout(() => {
+      loginWithRedirect();
+    }, 5000);
+    // return <div>You do not have access to this page. "ProtectedRoute"</div>;
   }
 
   // ✅ Only render children when access is confirmed

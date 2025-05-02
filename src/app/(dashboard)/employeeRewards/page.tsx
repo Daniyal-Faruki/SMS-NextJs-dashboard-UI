@@ -109,7 +109,7 @@ const EmployeeRewardsPage = () => {
 
   useEffect(() => {
     fetchEmployeeRewards();
-  }, [formData.searchQuery, formData.toggleValue]);
+  }, [formData.searchQuery, formData.toggleValue, formData.startDate]);
 
   // this method can be put into shared
   const filterAvailableTeams = (
@@ -146,6 +146,8 @@ const EmployeeRewardsPage = () => {
   };
 
   const handleSelectChange = (period: any) => {
+    console.log("Period range Changed: ", period);
+    setFormData((prev) => ({...prev, startDate: period.startDate, endDate: period.endDate}))
     setSelectedPeriod(period);
   };
 
@@ -177,7 +179,7 @@ const EmployeeRewardsPage = () => {
 
   return (
     <ProtectedRoute requiredRoles={['sys-admin', 'rps-admin', 'org-admin', 'user']}> {/* Protect this page with roles */}
-    <div className="flex flex-col gap-y-8">
+    <div className="flex flex-col gap-y-3">
       <span className="text-4xl font-semibold">{ComponentToLoad}</span>
       <SearchFormWrapper
         formData={formData}

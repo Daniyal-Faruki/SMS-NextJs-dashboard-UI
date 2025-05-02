@@ -19,7 +19,7 @@ export default function DashboardLayout({
 }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
-  
+
   return (
     <ProtectedRoute requiredRoles={['sys-admin', 'rps-admin', 'org-admin', 'user']}>
       <div className="h-screen flex">
@@ -35,7 +35,7 @@ export default function DashboardLayout({
             {isSidebarCollapsed ? 
             <ChevronRight className="w-7" /> : <ChevronLeft className="w-7" />}
           </button>
-          <OrganizationSelector />
+          <OrganizationSelector isCollapsed={isSidebarCollapsed} />
           <Menu isCollapsed={isSidebarCollapsed} />
           <div className="absolute bottom-0 left-0 w-full">
             <UserMenu isCollapsed={isSidebarCollapsed} />

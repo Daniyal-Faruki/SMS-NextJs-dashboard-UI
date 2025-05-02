@@ -188,7 +188,7 @@ const EmployeesPage = () => {
 
   return (
     <ProtectedRoute requiredRoles={['sys-admin', 'rps-admin', 'org-admin']}> {/* Protect this page with roles */}
-    <div className="flex flex-col gap-y-8">
+    <div className="flex flex-col gap-y-3">
       <span className="text-4xl font-semibold">{ComponentToLoad}</span>
       <SearchFormWrapper
         formData={formData}
