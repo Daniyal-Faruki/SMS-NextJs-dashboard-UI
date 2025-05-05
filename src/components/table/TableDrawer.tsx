@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import TableContent from "./TableContent";
 import { ComponentNameEnum } from "@/utils/enums";
 import { SnackbarProvider } from "../shared/SnackbarContext";
+import { EmployeeReward } from "@/models/employee-reward.model";
 
 interface TableColumns {
   label: string;
@@ -26,6 +27,7 @@ interface TableDrawerProps<T extends Record<string, any>> {
     startDate?: string;
     endDate?: string;
   }>;
+  openDialog?: (reward: EmployeeReward, isEditReward?: boolean) => void;
 }
 
 // ✅ Add constraint here
@@ -38,6 +40,7 @@ const TableDrawer = <T extends Record<string, any>>({
   startDate,
   endDate,
   DrawerComponent,
+  openDialog,
 }: TableDrawerProps<T>) => {
   const [selectedRow, setSelectedRow] = useState<T | null>(null);
 
@@ -57,6 +60,8 @@ const TableDrawer = <T extends Record<string, any>>({
           organizationKey={organizationKey}
           reloadTable={reloadTable}
           ComponentToLoad={ComponentToLoad}
+          openDrawerForRow={handleRowClick} // ✅ Pass to support action menu
+          openDialog={openDialog} 
         />
 
         {selectedRow && (

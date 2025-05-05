@@ -8,7 +8,7 @@ export interface SearchFormWrapperProps {
     ComponentToLoad: string;
     ComponentNameEnum: any;
     canCreate: boolean;
-    openDialog: (type: string) => void;
+    openDialog: <T = any>(type: string, data?: T, isEdit?: boolean) => void;
     dialogConfig: any;
     open: boolean;
     dialogType: string | null;
@@ -26,4 +26,5 @@ export interface SearchFormWrapperProps {
     handleFormat: (e: any, newVal: string) => void;
     handleTeamDropdown: (e: any) => void;
     rewardToEdit?: EmployeeReward;
+    isEdit?: boolean;
   }

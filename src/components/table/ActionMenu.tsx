@@ -12,6 +12,8 @@ interface ActionMenuProps {
     ComponentToLoad: ComponentNameEnum;  // Make sure ComponentToLoad is typed correctly
     organizationKey: string;
     reloadTable: () => void;
+    openDrawerForRow?: () => void;
+    openDialog?: (reward: EmployeeReward, isEditReward?: boolean) => void;
   }
 
 const ActionMenu: React.FC<ActionMenuProps> = ({
@@ -19,6 +21,8 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
   ComponentToLoad,
   organizationKey,
   reloadTable,
+  openDrawerForRow,
+  openDialog,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -30,16 +34,36 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
     setAnchorEl(null);
   };
 
-  const handleDelete = () => {
+  const handleDeleteEmployee = () => {
     console.log('delete', item);
     handleClose();
     // TODO: Add delete logic with API
   };
 
-  const handleView = () => {
-    console.log('view', item);
+  const handleAddReward = () => {
+    console.log('handleAddReward', item);
+    handleClose();
+    // TODO: Add delete logic with API
+    openDialog?.(item as EmployeeReward,false);  // ✅ Open the dialog for adding rewards
+  };
+
+  const handleDisableEmployee = () => {
+    console.log('handleDisableEmployee', item);
+    handleClose();
+    // TODO: Add delete logic with API
+  };
+
+  const handleEditemployee = () => {
+    console.log('handleEditemployee', item);
     handleClose();
     // TODO: Add logic to open detail panel if needed
+  };
+
+  const ViewEmployeeRewards = () => {
+    console.log('ViewEmployeeRewards', item);
+    handleClose();
+    // TODO: Add logic to open detail panel if needed
+    openDrawerForRow?.();
   };
 
   return (
@@ -48,8 +72,19 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
         <MoreVertIcon />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={handleView}>View</MenuItem>
-        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+        {ComponentToLoad === ComponentNameEnum.Employees && (
+          <div>
+            <MenuItem onClick={handleEditemployee}>Edit information</MenuItem>
+            <MenuItem onClick={handleDisableEmployee}>Disable</MenuItem>
+            <MenuItem onClick={handleDeleteEmployee}>Delete employee</MenuItem>
+          </div>
+        )}
+        {ComponentToLoad === ComponentNameEnum.EmployeeRewards && (
+          <div>
+            <MenuItem onClick={ViewEmployeeRewards}>View information</MenuItem>
+            <MenuItem onClick={handleAddReward}>Add rewards</MenuItem>
+          </div>
+        )}
       </Menu>
     </>
   );

@@ -33,6 +33,8 @@ interface TableContentProps<T> {
   organizationKey: string;
   reloadTable: () => void;
   ComponentToLoad: ComponentNameEnum;
+  openDrawerForRow?: (row: T) => void;
+  openDialog?: (reward: EmployeeReward, isEditReward?: boolean) => void;
 }
 
 const TableContent = <T extends Record<string, any>>({
@@ -42,6 +44,8 @@ const TableContent = <T extends Record<string, any>>({
   organizationKey,
   reloadTable,
   ComponentToLoad,
+  openDrawerForRow,
+  openDialog,
 }: TableContentProps<T>) => {
   return (
     <TableContainer
@@ -174,15 +178,18 @@ const TableContent = <T extends Record<string, any>>({
                 style={{
                   position: "sticky",
                   right: 0,
-                  backgroundColor: "#fff",
+                  // backgroundColor: "#fff",
                   zIndex: 2,
                 }}
+                onClick={(e) => e.stopPropagation()} // 🛑 Prevents onRowClick from firing
               >
                 <ActionMenu
                   item={row}
                   ComponentToLoad={ComponentToLoad}
                   organizationKey={organizationKey}
                   reloadTable={reloadTable}
+                  openDrawerForRow={() => openDrawerForRow?.(row)}
+                  openDialog={openDialog} 
                 />
               </TableCell>
             </TableRow>

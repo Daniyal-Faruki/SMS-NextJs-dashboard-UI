@@ -49,6 +49,7 @@ interface AddEmployeeRewardDialogProps {
     severity: "success" | "error" | "warning" | "info"
   ) => void;
   rewardToEdit?: EmployeeReward;
+  isEdit?: boolean;
 }
 
 const rewardSchema: Yup.ObjectSchema<AddRewardFormValues> = Yup.object({
@@ -69,7 +70,8 @@ const AddEmployeeRewardDialog = ({
   setOpenSnackbar,
   setSnackbarMessage,
   setSnackbarSeverity,
-  rewardToEdit
+  rewardToEdit,
+  isEdit
 }: AddEmployeeRewardDialogProps) => {
   const api = useApi();
   const [lookups, setLookups] = useState<EmployeeRewardLookup>({
@@ -108,7 +110,9 @@ const AddEmployeeRewardDialog = ({
         const data = await fetchEmployeeRewardsLookups(api, organizationKey);
         setLookups(data);
         // If there are periods, set the first one as default
-        if (data.periods?.length > 0 && !rewardToEdit) {
+        console.log('IS EDIT REWARDS: ', isEdit);
+        
+        if (data.periods?.length > 0 && !isEdit) {
           // formik.setFieldValue('period', lookupData.periods[0].uid);
           setValue("periodUid", data.periods[0].uid);
         }

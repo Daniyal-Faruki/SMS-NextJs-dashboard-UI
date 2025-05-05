@@ -37,7 +37,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
         onChange={onChange}
         displayEmpty
       >
-        <MenuItem value="">{placeholder}</MenuItem>
+        <MenuItem value="" disabled>{placeholder}</MenuItem>
         {options.map((opt) => (
           <MenuItem key={opt.value} value={opt.value}>
             {opt.label}

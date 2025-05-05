@@ -29,7 +29,7 @@ const EmployeeRewardsPage = () => {
     startDate: "",
     endDate: "",
   });
-  
+
   const [selectedPeriod, setSelectedPeriod] = useState({ endDate: "" });
   const [open, setOpen] = useState(false);
   const [dialogType, setDialogType] = useState<string | null>(null);
@@ -42,18 +42,16 @@ const EmployeeRewardsPage = () => {
   const canCreate = true; // Change this as needed
   const isMobile = useIsMobile(); // Adjust this based on actual media queries (you can use a hook like `useMediaQuery`)
   const [editReward, setEditReward] = useState<EmployeeReward>();
-  
+  const [isEdit, setIsEdit] = useState(false);
+
   // Sample data for dialogConfig
   const dialogConfig = {
     "Employee Rewards": {
       label: "Add Reward",
       buttonClass: "btn-add-new",
       component: AddEmployeeRewardDialog,
-    },
-    // EmployeeRewards: {
-    //   label: "Add Reward",
-    //   buttonClass: "btn-add-reward",
-    // },
+      isEdit: isEdit
+    }
   };
 
   // Fetch lookup data on component mount
@@ -62,6 +60,16 @@ const EmployeeRewardsPage = () => {
       try {
         const data = await getScheduleRangeLookup(api, "ZIN");
         setPeriodsRange(data); // ✅ only update if still mounted
+        if (data.length > 0) {
+          const defaultPeriod = data[0];
+
+          setSelectedPeriod(defaultPeriod); // ✅ this was missing
+          setFormData((prev) => ({
+            ...prev,
+            startDate: data[0].startDate,
+            endDate: data[0].endDate,
+          }));
+        }
         // console.log("Periods Range in ER: ", data);
       } catch (error: any) {
         console.error("Error fetching schedule periods:", error);
@@ -74,7 +82,7 @@ const EmployeeRewardsPage = () => {
 
     getPeriodsLookup();
   }, []); // Empty dependency array means this runs only once, on component mount
-  
+
   const fetchEmployeeRewards = async () => {
     try {
       const payload = {
@@ -88,27 +96,28 @@ const EmployeeRewardsPage = () => {
       };
       const data = await searchEmployeeRewards(api, "ZIN", payload);
       // console.log("Employee Rewards Data: ", data);
-        setEmployees(data);
-        if (payload.searchString === "" && payload.teams === "") {
-          // Extract unique teams from employee data
-          const teamNames = filterAvailableTeams(data);
-          setTeams(teamNames as Team[]); // Set unique team names to state
-        }
-        setColumns([
-          { label: "Employee", key: "employeeName" },
-          { label: "Team", key: "teamName" },
-          { label: "Total", key: "total" },
-        ]);
+      setEmployees(data);
+      if (payload.searchString === "" && payload.teams === "") {
+        // Extract unique teams from employee data
+        const teamNames = filterAvailableTeams(data);
+        setTeams(teamNames as Team[]); // Set unique team names to state
+      }
+      setColumns([
+        { label: "Employee", key: "employeeName" },
+        { label: "Team", key: "teamName" },
+        { label: "Total", key: "total" },
+      ]);
     } catch (error) {
       const errorHandlerMessage = handleError(error);
-        // setOpenSnackbar(true);
-        // setSnackbarSeverity("error");
-        // setSnackbarMessage(errorHandlerMessage);
+      // setOpenSnackbar(true);
+      // setSnackbarSeverity("error");
+      // setSnackbarMessage(errorHandlerMessage);
     }
   };
 
   useEffect(() => {
     fetchEmployeeRewards();
+    console.log("Form Data: ", formData);
   }, [formData.searchQuery, formData.toggleValue, formData.startDate]);
 
   // this method can be put into shared
@@ -135,7 +144,6 @@ const EmployeeRewardsPage = () => {
       }));
   };
 
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, searchQuery: e.target.value }));
   };
@@ -147,17 +155,23 @@ const EmployeeRewardsPage = () => {
 
   const handleSelectChange = (period: any) => {
     console.log("Period range Changed: ", period);
-    setFormData((prev) => ({...prev, startDate: period.startDate, endDate: period.endDate}))
+    setFormData((prev) => ({
+      ...prev,
+      startDate: period.startDate,
+      endDate: period.endDate,
+    }));
     setSelectedPeriod(period);
   };
 
-  const openDialog = (type: string, rewardData?: EmployeeReward) => {
-    console.log("Employee reward to edit: ",rewardData );
+  const openDialog = <T = any>(type: string, data?: T, isEdit?: boolean) => {
+    // console.log("Employee reward to edit: ", rewardData);
+    console.log("isEditReward: ", isEdit);
     
-  setDialogType(type);
-  setEditReward(rewardData);
-  setOpen(true);
-};
+    setIsEdit(isEdit ?? false);
+    setDialogType(type);
+    setEditReward(data as EmployeeReward);
+    setOpen(true);
+  };
 
   const closeDialog = () => {
     setOpen(false);
@@ -178,56 +192,65 @@ const EmployeeRewardsPage = () => {
   };
 
   return (
-    <ProtectedRoute requiredRoles={['sys-admin', 'rps-admin', 'org-admin', 'user']}> {/* Protect this page with roles */}
-    <div className="flex flex-col gap-y-3">
-      <span className="text-4xl font-semibold">{ComponentToLoad}</span>
-      <SearchFormWrapper
-        formData={formData}
-        handleSearchChange={handleSearchChange}
-        handleSubmit={handleSubmit}
-        // gridClass={gridClass}
-        ComponentToLoad={ComponentToLoad}
-        ComponentNameEnum={ComponentNameEnum}
-        canCreate={canCreate}
-        openDialog={openDialog}
-        dialogConfig={dialogConfig}
-        rewardToEdit={editReward}
-        open={open}
-        dialogType={dialogType}
-        closeDialog={closeDialog}
-        organizationKey="ZIN"
-        reloadTable={reloadTable}
-        setOpenSnackbar={() => {}}
-        setSnackbarMessage={() => {}}
-        setSnackbarSeverity={() => {}}
-        selectedPeriod={selectedPeriod}
-        handleSelectChange={handleSelectChange}
-        periodsRange={periodsRange}
-        isMobile={isMobile}
-        teams={teams}
-        handleFormat={handleFormat}
-        handleTeamDropdown={handleTeamDropdown}
-      />
-      <TableDrawer
-        data={employees}
-        columns={columns}
-        organizationKey="ZIN"
-        reloadTable={() => console.log("Reloading...")}
-        ComponentToLoad={ComponentNameEnum.EmployeeRewards}
-        startDate=""
-        endDate=""
-        DrawerComponent={({ selectedRow, ...rest }) => (
-          // <UpdateEmployee employee={selectedRow as Employee} {...rest} />
-          <SpecificEmployeeRewards
-            employeeUid={selectedRow.employeeUid ?? null}
-            startDate={formData.startDate}
-            endDate={formData.endDate}
-            openDialogForEdit={(reward) => openDialog("Employee Rewards", reward)}
-            {...rest}
-          />
-        )}
-      />
-    </div>
+    <ProtectedRoute
+      requiredRoles={["sys-admin", "rps-admin", "org-admin", "user"]}
+    >
+      {" "}
+      {/* Protect this page with roles */}
+      <div className="flex flex-col gap-y-3">
+        <span className="text-4xl font-semibold">{ComponentToLoad}</span>
+        <SearchFormWrapper
+          formData={formData}
+          handleSearchChange={handleSearchChange}
+          handleSubmit={handleSubmit}
+          // gridClass={gridClass}
+          ComponentToLoad={ComponentToLoad}
+          ComponentNameEnum={ComponentNameEnum}
+          canCreate={canCreate}
+          openDialog={openDialog}
+          dialogConfig={dialogConfig}
+          rewardToEdit={editReward}
+          isEdit={isEdit}
+          open={open}
+          dialogType={dialogType}
+          closeDialog={closeDialog}
+          organizationKey="ZIN"
+          reloadTable={reloadTable}
+          setOpenSnackbar={() => {}}
+          setSnackbarMessage={() => {}}
+          setSnackbarSeverity={() => {}}
+          selectedPeriod={selectedPeriod}
+          handleSelectChange={handleSelectChange}
+          periodsRange={periodsRange}
+          isMobile={isMobile}
+          teams={teams}
+          handleFormat={handleFormat}
+          handleTeamDropdown={handleTeamDropdown}
+        />
+        <TableDrawer
+          data={employees}
+          columns={columns}
+          organizationKey="ZIN"
+          reloadTable={() => console.log("Reloading...")}
+          ComponentToLoad={ComponentNameEnum.EmployeeRewards}
+          startDate={formData.startDate} //""
+          endDate={formData.endDate} //""
+          openDialog={(reward, isEdit) =>
+            openDialog("Employee Rewards", reward, isEdit)}
+          DrawerComponent={({ selectedRow, ...rest }) => (
+            // <UpdateEmployee employee={selectedRow as Employee} {...rest} />
+            <SpecificEmployeeRewards
+              employeeUid={selectedRow.employeeUid ?? null}
+              startDate={formData.startDate}
+              endDate={formData.endDate}
+              openDialogForEdit={(reward,isEdit) =>
+                openDialog("Employee Rewards", reward,isEdit)
+              }
+              {...rest}
+            />
+          )}
+        />
+      </div>
     </ProtectedRoute>
   );
 };

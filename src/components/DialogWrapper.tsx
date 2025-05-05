@@ -11,6 +11,7 @@ interface Props {
       label: string;
       buttonClass: string;
       component: React.ComponentType<any>;
+      isEdit?: boolean;
     };
   };
   [key: string]: any;
@@ -23,6 +24,7 @@ const DialogWrapper: React.FC<Props> = ({
   dialogType,
   dialogConfig,
   rewardToEdit,
+  // isEdit,
   ...props
 }) => {
   if (!dialogType || !dialogConfig[dialogType]?.component) return null;
@@ -34,6 +36,7 @@ const DialogWrapper: React.FC<Props> = ({
       open={open}
       handleClose={onClose}
       rewardToEdit={rewardToEdit}
+      isEdit={dialogConfig[dialogType].isEdit}
       {...props}
     />
   );

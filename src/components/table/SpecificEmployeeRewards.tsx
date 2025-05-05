@@ -29,7 +29,7 @@ interface Props {
   onClose: () => void;
   ComponentToLoad?: string; // ✅ Make optional if not used
   data?: EmployeeReward[]; // ✅ Make optional if not used
-  openDialogForEdit: (reward: EmployeeReward) => void;
+  openDialogForEdit: (reward: EmployeeReward, isEditReward?: boolean) => void;
 }
 
 const SpecificEmployeeRewards: React.FC<Props> = ({
@@ -48,22 +48,23 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
   const api = useApi();
   const [totalPoints, setTotalPoints] = useState(0);
   //   const { getAuthHeaders } = useAuthHeaders();
-console.log("Start DAte: ", startDate);
-console.log("End DAte: ", endDate);
 
   const fetchEmployeeRewards = async () => {
+    if (!employeeUid) {
+      console.warn("No employeeUid provided");
+      return;
+    }
+
+    setLoading(true); // ✅ Start loading
+    setError(""); // optional: reset error before fetch
+
     try {
-      if (!employeeUid) {
-        console.warn("No employeeUid provided");
-        return;
-      }
       const payload = {
         employeeUid: employeeUid,
         startDate: startDate,
         endDate: endDate,
       };
-      console.log("specificEmployeeRewards payload: ", payload);
-      
+
       const data = await specificEmployeeRewards(api, "ZIN", payload);
       // console.log("Specific Employee-Rewards Data: ", data);
       // setEmployees(data);
@@ -75,10 +76,13 @@ console.log("End DAte: ", endDate);
       setRewards(data);
     } catch (error) {
       const errorHandlerMessage = handleError(error);
+      setError(errorHandlerMessage); // ✅ show error if needed
       console.log("Error SpecificEmployeeRewards: ", error);
       // setOpenSnackbar(true);
       // setSnackbarSeverity("error");
       // setSnackbarMessage(errorHandlerMessage);
+    } finally {
+      setLoading(false); // ✅ Always stop loading
     }
   };
 
@@ -89,10 +93,13 @@ console.log("End DAte: ", endDate);
       setPeriodsRange(data.periods);
     } catch (error) {
       const errorHandlerMessage = handleError(error);
+      setError(errorHandlerMessage); // ✅ show error if needed
       // setOpenSnackbar(true);
       // setSnackbarSeverity("error");
       // setSnackbarMessage(errorHandlerMessage);
       console.log("fetchEmployeeRewardsLookups error: ", error);
+    } finally {
+      setLoading(false); // ✅ Always stop loading
     }
   };
 
@@ -101,6 +108,7 @@ console.log("End DAte: ", endDate);
     // if (hasRpsAdminRole || hasOrgAdminRole || hasSysAdminRole) {
     // 	getEmployeeRewardsLookup(organizationKey);
     // }
+    setRewards([]); // prevent stale rewards while loading new
     fetchEmployeeRewards();
     loadEmployeeRewardsLookups();
   }, [employeeUid, startDate, endDate]);
@@ -115,15 +123,22 @@ console.log("End DAte: ", endDate);
   };
 
   return (
-    <div className="p-4 w-full max-w-96 border rounded-xl ">
-      <div className="flex justify-between items-center mb-4">
-        {/* <Typography variant="h6">Employee Rewards</Typography> */}
-        {rewards.length > 0 && (
-          <div className="flex items-center gap-x-2">
-            <Image src={noImage} alt="app-logo" width={56} height={56} className="rounded-full"/>
-            <span className="editSidenavName">{rewards[0].employeeName}</span>
-          </div>
-        )}
+    <div className="p-3 w-full max-w-96 border rounded-xl ">
+      <div className="flex items-center mb-4">
+        <div className="flex items-center gap-x-2 flex-grow">
+          {rewards.length > 0 && (
+            <>
+              <Image
+                src={noImage}
+                alt="app-logo"
+                width={56}
+                height={56}
+                className="rounded-full"
+              />
+              <span className="editSidenavName">{rewards[0].employeeName}</span>
+            </>
+          )}
+        </div>
         <IconButton onClick={onClose}>
           <CloseIcon />
         </IconButton>
@@ -139,18 +154,11 @@ console.log("End DAte: ", endDate);
 
       {!loading && rewards.length === 0 && (
         <div className="flex justify-center py-6">
-          <CircularProgress />
-          <Typography>No rewards found for selected date range.</Typography>
+          <Typography>No rewards found.</Typography>
         </div>
       )}
 
       {!loading && rewards.length > 0 && (
-        <div className="">
-          {/* <div className="flex items-center gap-x-2">
-            <Image src={noImage} alt="app-logo" width={32} height={32} />
-            <span className="editSidenavName">{rewards[0].employeeName}</span>
-          </div> */}
-
           <div className="mt-4 max-sm:mt-1">
             <div className="editRewards">
               <div className="mb-2 max-sm:mb-1">
@@ -189,7 +197,7 @@ console.log("End DAte: ", endDate);
                                 // onClick={(
                                 //   event: React.MouseEvent<HTMLButtonElement>
                                 // ) => openAddEmployeeRewardsDialog(event, item)}
-                                onClick={() => openDialogForEdit(item)}
+                                onClick={() => openDialogForEdit(item, true)}
                                 color="primary"
                                 className="btn-edit flex items-center"
                               >
@@ -249,7 +257,6 @@ console.log("End DAte: ", endDate);
               </div>
             </div>
           </div>
-        </div>
       )}
     </div>
   );

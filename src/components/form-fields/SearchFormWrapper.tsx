@@ -19,6 +19,7 @@ const SearchFormWrapper: React.FC<SearchFormWrapperProps> = ({
   canCreate,
   openDialog,
   rewardToEdit,
+  isEdit,
   dialogConfig,
   open,
   dialogType,
@@ -68,7 +69,7 @@ const SearchFormWrapper: React.FC<SearchFormWrapperProps> = ({
 
         {canCreate && ComponentToLoad === ComponentNameEnum.Employees && (
           <AddButton
-            onClick={() => openDialog(ComponentNameEnum.Employees)}
+            onClick={() => openDialog(ComponentNameEnum.Employees,false)}
             iconSrc={true}
             label={dialogConfig.Employees.label}
             className={`addEmpBtnRes btn-add-new max-w-fit justify-self-end max-sm:max-w-full ${dialogConfig.Employees.buttonClass}`}
@@ -77,7 +78,7 @@ const SearchFormWrapper: React.FC<SearchFormWrapperProps> = ({
 
         {canCreate && ComponentToLoad === ComponentNameEnum.EmployeeRewards && (
           <AddButton
-            onClick={() => openDialog(ComponentNameEnum.EmployeeRewards)}
+            onClick={() => openDialog(ComponentNameEnum.EmployeeRewards, false)}
             iconSrc={true}
             label={dialogConfig[ComponentNameEnum.EmployeeRewards].label}
             className={`max-sm:order-1 w-fit max-sm:w-full justify-self-end btn-add-new ${dialogConfig[ComponentNameEnum.EmployeeRewards].buttonClass}`}
@@ -92,6 +93,7 @@ const SearchFormWrapper: React.FC<SearchFormWrapperProps> = ({
           organizationKey={organizationKey}
           reloadTable={reloadTable}
           rewardToEdit={rewardToEdit} 
+          // isEdit={isEdit}
           setOpenSnackbar={setOpenSnackbar}
           setSnackbarMessage={setSnackbarMessage}
           setSnackbarSeverity={setSnackbarSeverity}
