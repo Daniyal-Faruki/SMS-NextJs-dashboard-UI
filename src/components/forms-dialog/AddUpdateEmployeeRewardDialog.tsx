@@ -19,7 +19,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Cross from "../../assets/icons/cross.svg";
 import { useApi } from "@/hooks/useApi";
 import { handleError } from "@/components/shared/errorHandler";
-import { addEmployeeRewards, fetchEmployeeRewardsLookups } from "@/services/employeeRewardService";
+import {
+  addEmployeeRewards,
+  fetchEmployeeRewardsLookups,
+} from "@/services/employeeRewardService";
 import { EmployeeRewardLookup } from "@/models/employeeRewardLookup.model";
 import InputFieldWrapper from "../form-fields/text-input-field-wrapper";
 import SelectFieldWrapper from "../form-fields/select-input-field-wrapper";
@@ -71,7 +74,7 @@ const AddEmployeeRewardDialog = ({
   setSnackbarMessage,
   setSnackbarSeverity,
   rewardToEdit,
-  isEdit
+  isEdit,
 }: AddEmployeeRewardDialogProps) => {
   const api = useApi();
   const [lookups, setLookups] = useState<EmployeeRewardLookup>({
@@ -110,8 +113,8 @@ const AddEmployeeRewardDialog = ({
         const data = await fetchEmployeeRewardsLookups(api, organizationKey);
         setLookups(data);
         // If there are periods, set the first one as default
-        console.log('IS EDIT REWARDS: ', isEdit);
-        
+        console.log("IS EDIT REWARDS: ", isEdit);
+
         if (data.periods?.length > 0 && !isEdit) {
           // formik.setFieldValue('period', lookupData.periods[0].uid);
           setValue("periodUid", data.periods[0].uid);
@@ -159,13 +162,17 @@ const AddEmployeeRewardDialog = ({
     try {
       const payload = {
         employeeUid: data.employeeUid,
-				periodUid: data.periodUid,
-				rewardUid: data.rewardUid,
-				reason: data.remarks
+        periodUid: data.periodUid,
+        rewardUid: data.rewardUid,
+        reason: data.remarks,
       };
-      const responseData = await addEmployeeRewards(api, "ZIN", payload);
+      if(!isEdit){
+        const responseData = await addEmployeeRewards(api, "ZIN", payload);
+        console.log("responseData from Add-Rewards: ", responseData);
+      } else if (isEdit) {
+        // TODO Edit rewards Api Call Here
+      }
       console.log("Employee Rewards Data: ", data);
-      console.log("responseData from Add-Rewards: ", responseData);  
       // setOpenSnackbar(true);
       // setSnackbarMessage("Reward added successfully");
       // setSnackbarSeverity("success");
@@ -176,7 +183,7 @@ const AddEmployeeRewardDialog = ({
       setOpenSnackbar(true);
       setSnackbarMessage(errorMessage);
       setSnackbarSeverity("error");
-      console.log("Error in Add-Rewards: ", error);      
+      console.log("Error in Add-Rewards: ", error);
     }
   };
 
@@ -196,7 +203,9 @@ const AddEmployeeRewardDialog = ({
       }}
     >
       <DialogTitle className="flex justify-between items-center">
-        <span className="flex-grow addNewDialogTitle">Add Employee Reward</span>
+        <span className="flex-grow addNewDialogTitle">
+          {isEdit ? "Edit Reward" : "Add Reward"}
+        </span>
         <Cross onClick={handleClose} className="w-5 cursor-pointer" />
       </DialogTitle>
       <DialogContent>
@@ -213,6 +222,7 @@ const AddEmployeeRewardDialog = ({
                 control={control}
                 render={({ field }) => (
                   <Autocomplete
+                    disabled={isEdit ? true : false}
                     options={lookups.employees}
                     getOptionLabel={(option) => option.employeeName || ""}
                     onChange={(e, value) => {
@@ -249,12 +259,12 @@ const AddEmployeeRewardDialog = ({
                           className="flex items-center p-2 gap-x-3 cursor-pointer"
                         >
                           <Image
-                              src={NoUser}
-                              alt="User..."
-                              width={35}
-                              height={35} 
-                              className="rounded-full"
-                            />
+                            src={NoUser}
+                            alt="User..."
+                            width={35}
+                            height={35}
+                            className="rounded-full"
+                          />
                           <div>
                             <div className="font-600">
                               {option.employeeName}
@@ -309,60 +319,72 @@ const AddEmployeeRewardDialog = ({
 
             {/* Period */}
             {lookups.periods.length > 0 && (
-            <FormControl error={Boolean(errors.periodUid)}>
-              <span className="text-sm font-medium">Period *</span>
-              <Controller
-                name="periodUid"
-                control={control}
-                render={({ field }) => (
-                  <Select {...field} fullWidth size="small" displayEmpty>
-                    <MenuItem value="" disabled>
-                      Select Period
-                    </MenuItem>
-                    {lookups.periods.map((period) => (
-                      <MenuItem key={period.uid} value={period.uid}>
-                        {formatDate(period.startDate) +
-                          " - " +
-                          formatDate(period.endDate)}
+              <FormControl error={Boolean(errors.periodUid)}>
+                <span className="text-sm font-medium">Period *</span>
+                <Controller
+                  name="periodUid"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      fullWidth
+                      size="small"
+                      displayEmpty
+                      disabled={isEdit ? true : false}
+                    >
+                      <MenuItem value="" disabled>
+                        Select Period
                       </MenuItem>
-                    ))}
-                  </Select>
+                      {lookups.periods.map((period) => (
+                        <MenuItem key={period.uid} value={period.uid}>
+                          {formatDate(period.startDate) +
+                            " - " +
+                            formatDate(period.endDate)}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+                {errors.periodUid && (
+                  <FormHelperText>{errors.periodUid.message}</FormHelperText>
                 )}
-              />
-              {errors.periodUid && (
-                <FormHelperText>{errors.periodUid.message}</FormHelperText>
-              )}
-            </FormControl>
+              </FormControl>
             )}
 
             {/* Reward */}
             {lookups.teams.length > 0 && (
-            <FormControl error={Boolean(errors.rewardUid)}>
-              <span className="text-sm font-medium">Achievement *</span>
-              <Controller
-                name="rewardUid"
-                control={control}
-                render={({ field }) => (
-                  <Select {...field} fullWidth size="small" displayEmpty>
-                    <MenuItem value="" disabled>
-                      Select Achievement
-                    </MenuItem>
-                    {lookups.rewards.map((reward) => (
-                      <MenuItem key={reward.uid} value={reward.uid}>
-                        <p className="flex justify-between w-full items-center">
-                          <span className="user">{reward.rewardName}</span>
-                          <span>{reward.points}</span>
-                        </p>
-                        {/* {reward.rewardName} */}
+              <FormControl error={Boolean(errors.rewardUid)}>
+                <span className="text-sm font-medium">Achievement *</span>
+                <Controller
+                  name="rewardUid"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      fullWidth
+                      size="small"
+                      displayEmpty
+                      disabled={isEdit ? true : false}
+                    >
+                      <MenuItem value="" disabled>
+                        Select Achievement
                       </MenuItem>
-                    ))}
-                  </Select>
+                      {lookups.rewards.map((reward) => (
+                        <MenuItem key={reward.uid} value={reward.uid}>
+                          <p className="flex justify-between w-full items-center">
+                            <span className="user">{reward.rewardName}</span>
+                            <span>{reward.points}</span>
+                          </p>
+                          {/* {reward.rewardName} */}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+                {errors.rewardUid && (
+                  <FormHelperText>{errors.rewardUid.message}</FormHelperText>
                 )}
-              />
-              {errors.rewardUid && (
-                <FormHelperText>{errors.rewardUid.message}</FormHelperText>
-              )}
-            </FormControl>
+              </FormControl>
             )}
 
             {/* Remarks */}
@@ -390,7 +412,8 @@ const AddEmployeeRewardDialog = ({
                   !isValid ? "btn-add-new-disabled cursor-not-allowed" : ""
                 }`}
               >
-                Add Reward
+                {/* TODO icon missing here  */}
+                {isEdit ? "Save Changes" : "Add Reward"}
               </Button>
             </DialogActions>
           </FormGroup>
