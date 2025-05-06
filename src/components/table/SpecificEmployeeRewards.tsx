@@ -4,19 +4,24 @@ import React, { useEffect, useState } from "react";
 import { CircularProgress, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { EmployeeReward } from "@/models/employee-reward.model";
-import { handleError } from "../shared/errorHandler";
 import {
+  deleteEmployeeReward,
   fetchEmployeeRewardsLookups,
   specificEmployeeRewards,
 } from "@/services/employeeRewardService";
 import { useApi } from "@/hooks/useApi";
+import { handleError } from "../shared/errorHandler";
 import { formatDate } from "@/utils/dateUtils";
+import { Period } from "@/models/period.model";
+
+import ConfirmationDialog from "../shared/confirmationDialog";
+
+import Image from "next/image";
 import noImage from "../../assets/icons/noImage.jpg";
+import avatar from "../../assets/images/avatar.png";
 import PointBullet from "../../assets/icons/pointBullet.svg";
 import Calender from "../../assets/icons/calender.svg";
 import User from "../../assets/icons/user.svg";
-import Image from "next/image";
-import { Period } from "@/models/period.model";
 import EditPencil from "../../assets/icons/edit-pencil.svg";
 import TrashRed from "../../assets/icons/trash-red.svg";
 
@@ -27,8 +32,8 @@ interface Props {
   organizationKey: string;
   reloadTable: () => void;
   onClose: () => void;
-  ComponentToLoad?: string; // ✅ Make optional if not used
-  data?: EmployeeReward[]; // ✅ Make optional if not used
+  ComponentToLoad?: string;
+  data?: EmployeeReward[];
   openDialogForEdit: (reward: EmployeeReward, isEditReward?: boolean) => void;
 }
 
@@ -41,105 +46,99 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
   onClose,
   openDialogForEdit,
 }) => {
+  const api = useApi();
   const [rewards, setRewards] = useState<EmployeeReward[]>([]);
-  const [periodsRange, setPeriodsRange] = useState<Period[]>([]); // Use the custom PeriodRangeLookup type
+  const [periodsRange, setPeriodsRange] = useState<Period[]>([]);
+  const [totalPoints, setTotalPoints] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const api = useApi();
-  const [totalPoints, setTotalPoints] = useState(0);
-  //   const { getAuthHeaders } = useAuthHeaders();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [rewardToDelete, setRewardToDelete] = useState<EmployeeReward | null>(null);
+
+  useEffect(() => {
+    if (employeeUid) {
+      fetchEmployeeRewards();
+      loadEmployeeRewardsLookups();
+    }
+  }, [employeeUid, startDate, endDate]);
 
   const fetchEmployeeRewards = async () => {
-    if (!employeeUid) {
-      console.warn("No employeeUid provided");
-      return;
-    }
-
-    setLoading(true); // ✅ Start loading
-    setError(""); // optional: reset error before fetch
-
     try {
+      setLoading(true);
+      if (!employeeUid) {
+        console.warn("No employeeUid provided");
+        return;
+      }
+      
       const payload = {
-        employeeUid: employeeUid,
-        startDate: startDate,
-        endDate: endDate,
+        employeeUid, // now guaranteed to be string
+        startDate,
+        endDate,
       };
-
       const data = await specificEmployeeRewards(api, "ZIN", payload);
-      // console.log("Specific Employee-Rewards Data: ", data);
-      // setEmployees(data);
-      // ✅ Calculate total reward points
-      const totalPoints = data.reduce((sum: number, reward: EmployeeReward) => {
-        return sum + (reward.points || 0); // Safe fallback if points is undefined
-      }, 0);
-      setTotalPoints(totalPoints);
       setRewards(data);
+      const total = data.reduce((sum, reward) => sum + (reward.points || 0), 0);
+      setTotalPoints(total);
     } catch (error) {
-      const errorHandlerMessage = handleError(error);
-      setError(errorHandlerMessage); // ✅ show error if needed
-      console.log("Error SpecificEmployeeRewards: ", error);
-      // setOpenSnackbar(true);
-      // setSnackbarSeverity("error");
-      // setSnackbarMessage(errorHandlerMessage);
+      setError(handleError(error));
     } finally {
-      setLoading(false); // ✅ Always stop loading
+      setLoading(false);
     }
   };
 
   const loadEmployeeRewardsLookups = async () => {
     try {
       const data = await fetchEmployeeRewardsLookups(api, organizationKey);
-
       setPeriodsRange(data.periods);
     } catch (error) {
-      const errorHandlerMessage = handleError(error);
-      setError(errorHandlerMessage); // ✅ show error if needed
-      // setOpenSnackbar(true);
-      // setSnackbarSeverity("error");
-      // setSnackbarMessage(errorHandlerMessage);
-      console.log("fetchEmployeeRewardsLookups error: ", error);
-    } finally {
-      setLoading(false); // ✅ Always stop loading
+      setError(handleError(error));
     }
   };
 
-  useEffect(() => {
-    // TODO
-    // if (hasRpsAdminRole || hasOrgAdminRole || hasSysAdminRole) {
-    // 	getEmployeeRewardsLookup(organizationKey);
-    // }
-    setRewards([]); // prevent stale rewards while loading new
-    fetchEmployeeRewards();
-    loadEmployeeRewardsLookups();
-  }, [employeeUid, startDate, endDate]);
-
   const checkDeleteEditRewardValidity = (periodUid: string) => {
-    // Check the value of periods
-    if (!rewards || !Array.isArray(rewards)) {
-      return false; // Return false if periods is undefined or not an array
-    }
-
     return periodsRange.some((period) => period.uid === periodUid);
   };
 
+  const handleOpenDeleteDialog = (reward: EmployeeReward) => {
+    setRewardToDelete(reward);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setRewardToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!rewardToDelete?.uid) {
+      console.warn("Reward UID is missing.");
+      return;
+    }
+
+    try {
+      await deleteEmployeeReward(api, organizationKey, rewardToDelete.uid);
+      reloadTable();
+      fetchEmployeeRewards();
+    } catch (err) {
+      console.error("Failed to delete reward:", err);
+    } finally {
+      handleCancelDelete();
+    }
+  };
+
   return (
-    <div className="p-3 w-full max-w-96 border rounded-xl ">
-      <div className="flex items-center mb-4">
-        <div className="flex items-center gap-x-2 flex-grow">
+    
+    <div className="w-full border rounded-xl right-drawer">
+      <div className="flex items-center mb-3 md:mb-6">
+        <div className="mt-3 pl-4 flex items-center gap-x-2 flex-grow">
           {rewards.length > 0 && (
             <>
-              <Image
-                src={noImage}
-                alt="app-logo"
-                width={56}
-                height={56}
-                className="rounded-full"
-              />
-              <span className="editSidenavName">{rewards[0].employeeName}</span>
+              <Image src={noImage} alt="user" width={56} height={56} className="rounded-full" />
+              <span className="editSidenavName font-medium">{rewards[0].employeeName}</span>
             </>
           )}
         </div>
-        <IconButton onClick={onClose}>
+        <IconButton onClick={onClose} className="ml-auto self-start">
           <CloseIcon />
         </IconButton>
       </div>
@@ -159,104 +158,94 @@ const SpecificEmployeeRewards: React.FC<Props> = ({
       )}
 
       {!loading && rewards.length > 0 && (
-          <div className="mt-4 max-sm:mt-1">
-            <div className="editRewards">
-              <div className="mb-2 max-sm:mb-1">
-                <p className="specific-rewards-data">Total points</p>
-                <span className="specific-rewards-data">{totalPoints}</span>
-              </div>
-              <div className="inner-div-container">
-                {rewards.map((item, index) => (
-                  <div className="inner-div mt-1" key={index}>
-                    <div className="line-container">
-                      <PointBullet className="w-3 h-3" />
-                      <div className="vertical-line"></div>
+        <div className="pl-1 md:pl-4">
+          <div className="editRewards">
+            <div className="mb-1 md:mb-6">
+              <p>Total points</p>
+              <span className="specific-rewards-data">{totalPoints}</span>
+            </div>
+
+            <div className="inner-div-container pr-4 mr-1">
+              {rewards.map((item, index) => (
+                <div className="inner-div mt-1" key={index}>
+                  <div className="line-container">
+                    <PointBullet className="w-3 h-3" />
+                    <div className="vertical-line"></div>
+                  </div>
+                  <div className="achievementDetails">
+                    <span className="achievement">
+                      {formatDate(item.startDate)} - {formatDate(item.endDate)}
+                    </span>
+
+                    <div className="flex justify-between gap-x-3 mt-1 md:mt-2">
+                      <div>
+                        <p>
+                          <Calender className="w-3 inline mr-2" />
+                          {formatDate(item.assignedAt ?? "")}
+                        </p>
+                        <span className="ml-5 specific-rewards-data">{item.points}</span>
+                      </div>
+
+                      {item.reward !== "Bonus" && checkDeleteEditRewardValidity(item.periodUid!) && (
+                        <div className="flex gap-x-2">
+                          <button onClick={() => openDialogForEdit(item, true)} className="btn-edit flex items-center">
+                            <EditPencil className="w-4 h-4" />
+                            <span className="ml-2">Edit</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleOpenDeleteDialog(item)}
+                            className="btn-delete flex items-center"
+                          >
+                            <TrashRed className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <div className="achievementDetails ">
-                      <span className="achievement">
-                        {formatDate(item.startDate)} -{" "}
-                        {formatDate(item.endDate)}
-                      </span>
-                      <div className="flex justify-between gap-x-3 max-sm:gap-x-0 mt-1">
-                        <div>
-                          <p>
-                            <Calender className="w-3 inline mr-2" />
-                            {formatDate(item.assignedAt ?? "")}
-                          </p>
-                          <span className="ml-5 specific-rewards-data">
-                            {item.points}
-                          </span>
-                        </div>
-                        {/* // TODO */}
-                        {item.reward !== "Bonus" &&
-                          checkDeleteEditRewardValidity(item.periodUid!) && (
-                            // canEdit &&
-                            // canDelete &&
-                            <div className="flex gap-x-2">
-                              <button
-                                // onClick={(
-                                //   event: React.MouseEvent<HTMLButtonElement>
-                                // ) => openAddEmployeeRewardsDialog(event, item)}
-                                onClick={() => openDialogForEdit(item, true)}
-                                color="primary"
-                                className="btn-edit flex items-center"
-                              >
-                                <EditPencil className="w-4 cursor-pointer" />
-                                <span className="ml-2">Edit</span>
-                              </button>
 
-                              <button
-                                // onClick={(
-                                //   event: React.MouseEvent<HTMLButtonElement>
-                                // ) => openConfirmationDialog(event, item)}
-                                color="primary"
-                                className="btn-delete flex items-center"
-                              >
-                                <TrashRed className="w-3 cursor-pointer" />
-                              </button>
-                            </div>
-                          )}
+                    <div className="mt-1 grid grid-cols-2 gap-x-6">
+                      <div>
+                        <p>Achievement</p>
+                        <span className="specific-rewards-data">{item.reward}</span>
                       </div>
+                      <div>
+                        <p>
+                          <User className="w-3 inline mr-2" />
+                          Assigned by
+                        </p>
+                        <span className="ml-5 flex gap-x-1 items-center specific-rewards-data">
+                          {/* <Image src={avatar} alt="app-logo" width={16} height={16} /> */}
+                          <Image src="/avatar.png" alt="" width={16} height={16} className="rounded-full"/>
+                          {item.assignedBy || "Manager"}
+                        </span>
+                      </div>
+                    </div>
 
-                      <div className="mt-1 grid grid-cols-2 gap-x-6">
-                        <div>
-                          <p>Achievement</p>
-                          {/* <!-- class "achievement" removing this capsule color class --> */}
-                          <span className="specific-rewards-data">
-                            {item.reward}
-                          </span>
-                        </div>
-                        <div>
-                          <p>
-                            <User className="w-3 inline mr-3" />
-                            Assigned by
-                          </p>
-                          <span className="ml-5 flex items-center specific-rewards-data">
-                            <Image
-                              src={noImage}
-                              alt="app-logo"
-                              width={25}
-                              height={25}
-                            />
-                            {item.assignedBy ? item.assignedBy : "Manager Here"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mt-1">
-                        <p>Reason</p>
-                        <div className="flex">
-                          <span className="specific-rewards-data">
-                            {item.reason}
-                          </span>
-                        </div>
-                      </div>
+                    <div className="mt-1">
+                      <p>Reason</p>
+                      <span className="specific-rewards-data">{item.reason}</span>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {deleteDialogOpen && (
+        <ConfirmationDialog
+          open={deleteDialogOpen}
+          title="Delete Reward"
+          message={
+            <>
+              Are you sure you want to delete{" "}
+              <strong>{rewardToDelete?.employeeName}'s</strong> achievement? This can’t be undone.
+            </>
+          }
+          onCancel={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+        />
       )}
     </div>
   );

@@ -43,11 +43,11 @@ const SearchFormWrapper: React.FC<SearchFormWrapperProps> = ({
     ? // ? 'grid grid-cols-[1.5fr_4.5fr] items-center max-md:grid-cols-2 max-md:gap-x-2 max-lg:grid-cols-2 max-lg:gap-x-2 gap-x-4 max-sm:flex max-sm:flex-col max-sm:gap-y-1'
     'genSearchAddBtn '
     : ComponentToLoad === ComponentNameEnum.EmployeeRewards
-      ? 'grid grid-cols-[1fr_2fr_1fr] items-center max-md:grid-cols-[1.5fr_1.5fr_1fr] max-md:gap-x-2 max-lg:grid-cols-[2fr_1.5fr_1fr] max-lg:gap-x-2 gap-x-3 max-sm:flex max-sm:flex-col max-sm:gap-y-4'
+      ? 'grid grid-cols-[1fr_2fr_1fr] items-center max-md:grid-cols-[1.5fr_1.5fr_1fr] max-md:gap-x-2 max-lg:grid-cols-[2fr_1.5fr_1fr] max-lg:gap-x-2 gap-x-3 max-sm:flex max-sm:flex-col max-sm:gap-y-1'
       : '';
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-y-2 max-sm:gap-y-4 max-w-full">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-y-1 md:gap-y-4 max-w-full">
       <div className={gridClass}>
         <SearchInput value={formData.searchQuery} onChange={handleSearchChange} />
 

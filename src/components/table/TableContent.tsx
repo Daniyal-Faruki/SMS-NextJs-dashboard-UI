@@ -178,7 +178,7 @@ const TableContent = <T extends Record<string, any>>({
                 style={{
                   position: "sticky",
                   right: 0,
-                  // backgroundColor: "#fff",
+                  backgroundColor: "#fff",
                   zIndex: 2,
                 }}
                 onClick={(e) => e.stopPropagation()} // 🛑 Prevents onRowClick from firing

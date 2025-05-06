@@ -3,6 +3,7 @@
 import { AxiosInstance } from "axios";
 import { EmployeeReward } from "@/models/employee-reward.model";
 import { EmployeeRewardLookup } from "@/models/employeeRewardLookup.model";
+import { environment } from "@/environments/environment";
 
 interface EmployeeRewardSearchPayload {
   searchString: string;
@@ -16,6 +17,8 @@ interface SpecificEmployeeRewardPayload {
   startDate: string;
   endDate: string;
 }
+
+const BaseApiUrl = `${environment.apiUrl}/api/v1/organizations`;
 
 export const searchEmployeeRewards = async (
   api: AxiosInstance,
@@ -35,7 +38,6 @@ export const specificEmployeeRewards = async (
   payload: SpecificEmployeeRewardPayload
 ): Promise<EmployeeReward[]> => {
   const response = await api.post(
-    // `https://localhost:7192/api/v1/organizations/${organizationKey}/employee-rewards/get-specific`,
     `/api/v1/organizations/${organizationKey}/employee-rewards/get-specific`,
     payload
   );
@@ -58,9 +60,34 @@ export const addEmployeeRewards = async (
   payload: any // define type here later
 ): Promise<EmployeeReward[]> => {
   const response = await api.post(
-    //  `https://localhost:7192/api/v1/organizations/${organizationKey}/employee-rewards`; // Create API call
     `/api/v1/organizations/${organizationKey}/employee-rewards`,
     payload
+  );
+  return response.data;
+};
+
+export const updateEmployeeRewards = async (
+  api: AxiosInstance,
+  organizationKey: string,
+  payload: any, // define type here later
+  employeeRewardUid: string
+): Promise<EmployeeReward[]> => {
+  const response = await api.patch(
+    // `https://localhost:7192/api/v1/organizations/${organizationKey}/employee-rewards/${employeeRewardData.uid}/patch` // Update API call
+    `/api/v1/organizations/${organizationKey}/employee-rewards/${employeeRewardUid}/patch`,
+    payload
+  );
+  return response.data;
+};
+
+export const deleteEmployeeReward = async (
+  api: AxiosInstance,
+  organizationKey: string,
+  employeeRewardUid: string
+): Promise<EmployeeReward[]> => {
+  const response = await api.delete(
+    // `${BaseApiUrl}/${organizationKey}/employees/${Uid}`
+    `/api/v1/organizations/${organizationKey}/employee-rewards/${employeeRewardUid}`
   );
   return response.data;
 };

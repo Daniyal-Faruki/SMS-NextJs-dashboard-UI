@@ -4,6 +4,7 @@ import TableContent from "./TableContent";
 import { ComponentNameEnum } from "@/utils/enums";
 import { SnackbarProvider } from "../shared/SnackbarContext";
 import { EmployeeReward } from "@/models/employee-reward.model";
+import useIsMobile from "@/hooks/useIsMobile";
 
 interface TableColumns {
   label: string;
@@ -43,28 +44,58 @@ const TableDrawer = <T extends Record<string, any>>({
   openDialog,
 }: TableDrawerProps<T>) => {
   const [selectedRow, setSelectedRow] = useState<T | null>(null);
+  const isMobile = useIsMobile(); // Use the hook to determine if it's a mobile device
 
   const handleRowClick = (row: T) => {
-    setSelectedRow(row);
+    setSelectedRow(row); // Set the row when clicked
   };
 
-  const handleCloseDrawer = () => setSelectedRow(null);
+  const handleCloseDrawer = () => setSelectedRow(null); // Close drawer when done
 
   return (
     <SnackbarProvider>
-      <div className="flex flex-col md:flex-row gap-4 h-full">
-        <TableContent
-          data={data}
-          columns={columns}
-          onRowClick={handleRowClick}
-          organizationKey={organizationKey}
-          reloadTable={reloadTable}
-          ComponentToLoad={ComponentToLoad}
-          openDrawerForRow={handleRowClick} // ✅ Pass to support action menu
-          openDialog={openDialog} 
-        />
+      <div className="flex gap-4 h-full">
+        {/* For mobile: if a row is selected, hide the table and show the drawer */}
+        {isMobile && !selectedRow && (
+          <TableContent
+            data={data}
+            columns={columns}
+            onRowClick={handleRowClick}
+            organizationKey={organizationKey}
+            reloadTable={reloadTable}
+            ComponentToLoad={ComponentToLoad}
+            openDrawerForRow={handleRowClick} // ✅ Pass to support action menu
+            openDialog={openDialog}
+          />
+        )}
 
-        {selectedRow && (
+        {/* If the device is mobile and a row is selected, show only the drawer */}
+        {isMobile && selectedRow && (
+          <DrawerComponent
+            selectedRow={selectedRow}
+            onClose={handleCloseDrawer}
+            organizationKey={organizationKey}
+            reloadTable={reloadTable}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        )}
+
+        {/* For larger devices, always show the table */}
+        {!isMobile && (
+          <TableContent
+            data={data}
+            columns={columns}
+            onRowClick={handleRowClick}
+            organizationKey={organizationKey}
+            reloadTable={reloadTable}
+            ComponentToLoad={ComponentToLoad}
+            openDrawerForRow={handleRowClick} // ✅ Pass to support action menu
+            openDialog={openDialog}
+          />
+        )}
+        {/* If the device is not mobile and a row is selected, then show the drawer */}
+        {!isMobile && selectedRow && (
           <DrawerComponent
             selectedRow={selectedRow}
             onClose={handleCloseDrawer}

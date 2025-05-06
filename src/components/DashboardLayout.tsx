@@ -44,7 +44,7 @@ export default function DashboardLayout({
 
         {/* Right */}
         {(isSidebarCollapsed && isMobile) || !isMobile ? (
-          <div className="w-full overflow-auto bg-white border-l-2 px-8 pt-8 z-0">
+          <div className="w-full overflow-auto bg-white border-l-2 px-3 pt-3 md:px-8 md:pt-8 z-0">
             {children}
           </div>
         ) : null}

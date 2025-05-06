@@ -197,8 +197,8 @@ const EmployeeRewardsPage = () => {
     >
       {" "}
       {/* Protect this page with roles */}
-      <div className="flex flex-col gap-y-3">
-        <span className="text-4xl font-semibold">{ComponentToLoad}</span>
+      <div className="flex flex-col gap-y-1 md:gap-y-3">
+        <span className="md:text-4xl font-semibold text-2xl">{ComponentToLoad}</span>
         <SearchFormWrapper
           formData={formData}
           handleSearchChange={handleSearchChange}
@@ -231,14 +231,13 @@ const EmployeeRewardsPage = () => {
           data={employees}
           columns={columns}
           organizationKey="ZIN"
-          reloadTable={() => console.log("Reloading...")}
+          reloadTable={reloadTable}
           ComponentToLoad={ComponentNameEnum.EmployeeRewards}
           startDate={formData.startDate} //""
           endDate={formData.endDate} //""
           openDialog={(reward, isEdit) =>
             openDialog("Employee Rewards", reward, isEdit)}
           DrawerComponent={({ selectedRow, ...rest }) => (
-            // <UpdateEmployee employee={selectedRow as Employee} {...rest} />
             <SpecificEmployeeRewards
               employeeUid={selectedRow.employeeUid ?? null}
               startDate={formData.startDate}

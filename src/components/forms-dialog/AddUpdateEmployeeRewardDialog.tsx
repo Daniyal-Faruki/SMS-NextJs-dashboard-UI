@@ -22,6 +22,7 @@ import { handleError } from "@/components/shared/errorHandler";
 import {
   addEmployeeRewards,
   fetchEmployeeRewardsLookups,
+  updateEmployeeRewards,
 } from "@/services/employeeRewardService";
 import { EmployeeRewardLookup } from "@/models/employeeRewardLookup.model";
 import InputFieldWrapper from "../form-fields/text-input-field-wrapper";
@@ -32,6 +33,7 @@ import Image from "next/image";
 import { EmployeeReward } from "@/models/employee-reward.model";
 
 interface AddRewardFormValues {
+  employeeRewardsUid?: string;
   employeeUid: string;
   employeeName: string;
   email: string;
@@ -56,6 +58,7 @@ interface AddEmployeeRewardDialogProps {
 }
 
 const rewardSchema: Yup.ObjectSchema<AddRewardFormValues> = Yup.object({
+  employeeRewardsUid: Yup.string(),
   employeeUid: Yup.string().required("Employee is required"),
   employeeName: Yup.string().required("Employee name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -95,6 +98,7 @@ const AddEmployeeRewardDialog = ({
     resolver: yupResolver(rewardSchema),
     mode: "onTouched",
     defaultValues: {
+      employeeRewardsUid: "",
       employeeUid: "",
       employeeName: "",
       email: "",
@@ -136,6 +140,7 @@ const AddEmployeeRewardDialog = ({
   useEffect(() => {
     if (rewardToEdit) {
       reset({
+        employeeRewardsUid: rewardToEdit.uid ?? "",
         employeeUid: rewardToEdit.employeeUid ?? "",
         employeeName: rewardToEdit.employeeName ?? "",
         email: rewardToEdit.email ?? "",
@@ -160,17 +165,22 @@ const AddEmployeeRewardDialog = ({
 
   const onSubmit = async (data: AddRewardFormValues) => {
     try {
-      const payload = {
-        employeeUid: data.employeeUid,
-        periodUid: data.periodUid,
-        rewardUid: data.rewardUid,
-        reason: data.remarks,
-      };
       if(!isEdit){
+        const payload = {
+          employeeUid: data.employeeUid,
+          periodUid: data.periodUid,
+          rewardUid: data.rewardUid,
+          reason: data.remarks,
+        };
         const responseData = await addEmployeeRewards(api, "ZIN", payload);
         console.log("responseData from Add-Rewards: ", responseData);
       } else if (isEdit) {
+        const payload = {
+          reason: data.remarks,
+        };
         // TODO Edit rewards Api Call Here
+        const responseData = await updateEmployeeRewards(api, "ZIN", payload, data.employeeRewardsUid ?? "");
+        console.log("responseData from Update-Rewards: ", responseData);
       }
       console.log("Employee Rewards Data: ", data);
       // setOpenSnackbar(true);
